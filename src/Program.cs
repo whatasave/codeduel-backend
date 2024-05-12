@@ -1,26 +1,29 @@
 using dotenv.net;
+using dotenv.net.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 DotEnv.Load();
 
 var builder = WebApplication.CreateBuilder(args);
-var connString = "server=" + Environment.GetEnvironmentVariable("MARIADB_HOST") +
-                ";port=" + Environment.GetEnvironmentVariable("MARIADB_PORT") +
-                ";database=" + Environment.GetEnvironmentVariable("MARIADB_DATABASE") +
-                ";user=" + Environment.GetEnvironmentVariable("MARIADB_USER") +
-                ";password=" + Environment.GetEnvironmentVariable("MARIADB_PASSWORD");
+var connString = "server=" + EnvReader.GetStringValue("MARIADB_HOST") +
+                ";port=" + EnvReader.GetStringValue("MARIADB_PORT") +
+                ";database=" + EnvReader.GetStringValue("MARIADB_DATABASE") +
+                ";user=" + EnvReader.GetStringValue("MARIADB_USER") +
+                ";password=" + EnvReader.GetStringValue("MARIADB_PASSWORD");
 // builder.Services.AddDbContext<DatabaseContext>(o => o.UseMySql(connString, ServerVersion.AutoDetect(connString)));
 
-builder.Services.AddCors(options => { options.AddPolicy("AllowAllPolicy", builder => {
-    builder
-        .WithOrigins(Environment.GetEnvironmentVariable("FRONTEND_URL"))
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
-        //.AllowAnyMethod(Environment.GetEnvironmentVariable("CORS_METHODS"))
-        //.AllowAnyHeader(Environment.GetEnvironmentVariable("CORS_HEADERS"))
-        //.AllowCredentials(Environment.GetEnvironmentVariable("CORS_CREDENTIALS"));
-});});
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAllPolicy", builder => {
+        builder
+            .WithOrigins(EnvReader.GetStringValue("FRONTEND_URL"))
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+        //.AllowAnyMethod(EnvReader.GetStringValue("CORS_METHODS"))
+        //.AllowAnyHeader(EnvReader.GetStringValue("CORS_HEADERS"))
+        //.AllowCredentials(EnvReader.GetStringValue("CORS_CREDENTIALS"));
+    });
+});
 
 var app = builder.Build();
 
