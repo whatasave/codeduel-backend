@@ -1,19 +1,13 @@
 namespace User;
-public class Controller {
-    private Service service;
-
-    public Controller(Service service) {
-        this.service = service;
-    }
-
+public class Controller(Service service) {
     public Controller(DatabaseContext database) : this(new Service(database)) {
     }
-    
-    public void Setup(RouteGroupBuilder group) {
-        group.MapGet("/{id}", findById);
+
+    public void SetupRoutes(RouteGroupBuilder group) {
+        group.MapGet("/{id}", FindById);
     }
 
-    public User findById(int id) {
-        return service.findById(id);
+    public User FindById(int id) {
+        return service.FindById(id);
     }
 }
