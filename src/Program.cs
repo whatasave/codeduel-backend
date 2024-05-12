@@ -27,7 +27,7 @@ var database = app.Services.GetRequiredService<DatabaseContext>();
 
 var v1 = app.MapGroup("/v1");
 
-new User.Controller(database).Setup(v1.MapGroup("/user"));
+new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
 new Lobby.Controller(database).Setup(v1.MapGroup("/lobby"));
 new Challenge.Controller(database).Setup(v1.MapGroup("/challenge"));
 new AuthGithub.Controller(database).Setup(v1.MapGroup("/auth/github"));
