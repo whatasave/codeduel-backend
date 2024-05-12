@@ -16,11 +16,10 @@ public class Controller(Service service) {
         var state = Guid.NewGuid().ToString();
 
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("oauth_state", state) {
-            HttpOnly = true,
-            // Domain = request.Host.Value,
-            Domain = "127.0.0.1",
-            Path = "/",
-            // Path = "/v1/auth/github",
+            HttpOnly = Environment.GetEnvironmentVariable("COOKIE_HTTP_ONLY") == "true",
+            Domain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN") ?? request.Host.Host,
+            Path = Environment.GetEnvironmentVariable("COOKIE_PATH") ?? "/",
+            Secure = Environment.GetEnvironmentVariable("COOKIE_SECURE") == "true",
             Expires = DateTimeOffset.Now.AddSeconds(60)
         }.ToString());
 
@@ -40,12 +39,7 @@ public class Controller(Service service) {
         return;
     }
     
-    public void Callback(
-        [FromQuery(Name = "code")] string code,
-        [FromQuery(Name = "state")] string state,
-        HttpRequest request,
-        HttpResponse response
-    ) {
+    public void Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state)) {
             _ = new StatusCodeResult(StatusCodes.Status400BadRequest);
             Console.Error.WriteLine("[Auth Github] Missing code or state");
@@ -96,11 +90,11 @@ public class Controller(Service service) {
         Console.WriteLine("[Auth Github] Refresh token: " + refreshToken);
         // storing tokens in cookies
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("refresh_token", refreshToken) {
-            HttpOnly = true,
-            // Domain = request.Host.Host,
-            Domain = "127.0.0.1",
-            Path = "/",
-            Expires = DateTimeOffset.Now.AddDays(30)
+            HttpOnly = Environment.GetEnvironmentVariable("COOKIE_HTTP_ONLY") == "true",
+            Domain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN") ?? request.Host.Host,
+            Path = Environment.GetEnvironmentVariable("COOKIE_PATH") ?? "/",
+            Secure = Environment.GetEnvironmentVariable("COOKIE_SECURE") == "true",
+            Expires = DateTimeOffset.Now.AddMinutes(int.Parse(Environment.GetEnvironmentVariable("JWT_REFRESH_TOKEN_EXPIRES_IN_MINUTES") ?? "43200"))
         }.ToString());
 
         var frontendRedirect = request.Cookies["return_to"] ?? Environment.GetEnvironmentVariable("FRONTEND_URL_AUTH_CALLBACK");

@@ -17,13 +17,13 @@ var connString = "server=" + EnvReader.GetStringValue("MARIADB_HOST") +
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAllPolicy", builder => {
         builder
-            .WithOrigins(EnvReader.GetStringValue("FRONTEND_URL"))
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
-        //.AllowAnyMethod(EnvReader.GetStringValue("CORS_METHODS"))
-        //.AllowAnyHeader(EnvReader.GetStringValue("CORS_HEADERS"))
-        //.AllowCredentials(EnvReader.GetStringValue("CORS_CREDENTIALS"));
+            .WithOrigins(EnvReader.GetStringValue("CORS_ORIGIN"))
+            .WithMethods(EnvReader.GetStringValue("CORS_METHODS"))
+            .WithHeaders(EnvReader.GetStringValue("CORS_HEADERS"));
+        
+        if (EnvReader.GetStringValue("CORS_CREDENTIALS") == "true") {
+            builder.AllowCredentials();
+        }
     });
 });
 
@@ -49,10 +49,7 @@ v1.MapGet("/health", (HttpRequest request, HttpResponse response) => {
     response.WriteAsync("{\"status\":\"ok\"}");
 });
 
-v1.MapGet("/auth/refresh" , (
-    HttpRequest request,
-    HttpResponse response
-) => {
+v1.MapGet("/auth/refresh" , (HttpRequest request, HttpResponse response) => {
     var refreshToken = request.Cookies["refresh_token"];
     Console.WriteLine("--refresh token: " + refreshToken);
 
@@ -101,10 +98,11 @@ v1.MapGet("/auth/refresh" , (
     var accessToken = jwtService.GenerateAccessToken(accessTokenPayload);
 
     response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("access_token", accessToken) {
-        HttpOnly = true,
-        // Domain = request.Host.Host,
-        // Path = "/",
-        Expires = DateTimeOffset.Now.AddMinutes(3)
+        HttpOnly = Environment.GetEnvironmentVariable("COOKIE_HTTP_ONLY") == "true",
+        Domain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN") ?? request.Host.Host,
+        Path = Environment.GetEnvironmentVariable("COOKIE_PATH") ?? "/",
+        Secure = Environment.GetEnvironmentVariable("COOKIE_SECURE") == "true",
+        Expires = DateTimeOffset.Now.AddMinutes(int.Parse(Environment.GetEnvironmentVariable("JWT_ACCESS_TOKEN_EXPIRES_IN_MINUTES") ?? "15"))
     }.ToString());
 
     var redirect = request.Query["redirect"];
@@ -120,8 +118,23 @@ v1.MapGet("/auth/refresh" , (
     return;
 });
 
-app.Run();
+v1.MapGet("/auth/logout", (HttpRequest request, HttpResponse response) => {
+    foreach (var cookie in new string[] { "refresh_token", "access_token", "oauth_state" }) {
+        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(cookie, "") {
+            HttpOnly = Environment.GetEnvironmentVariable("COOKIE_HTTP_ONLY") == "true",
+            Domain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN") ?? request.Host.Host,
+            Path = Environment.GetEnvironmentVariable("COOKIE_PATH") ?? "/",
+            Secure = Environment.GetEnvironmentVariable("COOKIE_SECURE") == "true",
+            Expires = DateTimeOffset.Now.AddDays(-1)
+        }.ToString());
+    }
 
+    response.StatusCode = StatusCodes.Status200OK;
+    response.ContentType = "application/json";
+    response.WriteAsync("{\"status\":\"ok\"}");
+});
+
+app.Run();
 
 class JwtPayload {
     public int Sub { get; set; }
