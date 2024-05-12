@@ -1,6 +1,8 @@
 using dotenv.net;
 using dotenv.net.Utilities;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 
 DotEnv.Load();
 
@@ -41,4 +43,87 @@ new Lobby.Controller(database).SetupRoutes(v1.MapGroup("/lobby"));
 new Challenge.Controller(database).SetupRoutes(v1.MapGroup("/challenge"));
 new AuthGithub.Controller(database).SetupRoutes(v1.MapGroup("/auth/github"));
 
+v1.MapGet("/health", (HttpRequest request, HttpResponse response) => {
+    response.StatusCode = StatusCodes.Status200OK;
+    response.ContentType = "application/json";
+    response.WriteAsync("{\"status\":\"ok\"}");
+});
+
+v1.MapGet("/auth/refresh" , (
+    HttpRequest request,
+    HttpResponse response
+) => {
+    var refreshToken = request.Cookies["refresh_token"];
+    Console.WriteLine("--refresh token: " + refreshToken);
+
+    if (refreshToken == null) {
+        response.StatusCode = StatusCodes.Status401Unauthorized;
+        response.ContentType = "application/json";
+        response.WriteAsync("{\"error\":\"missing refresh token\"}");
+        return;
+    }
+
+    var jwtService = new Jwt.Service(database);
+
+    JwtPayload? jwt = null;
+    try {
+        jwt = (JwtPayload?) jwtService.ValidateJwt(refreshToken);
+    } catch (Exception) {
+        response.StatusCode = StatusCodes.Status401Unauthorized;
+        response.ContentType = "application/json";
+        response.WriteAsync("{\"error\":\"invalid refresh token\"}");
+        return;
+    }
+
+    if (jwt == null) {
+        response.StatusCode = StatusCodes.Status401Unauthorized;
+        response.ContentType = "application/json";
+        response.WriteAsync("{\"error\":\"invalid refresh token\"}");
+        return;
+    }
+
+
+    var userService = new User.Service(database);
+    // var user = database.Users.Find(jwt.Sub);
+    var user = userService.FindById(jwt.Sub);
+    if (user == null) {
+        response.StatusCode = StatusCodes.Status401Unauthorized;
+        response.ContentType = "application/json";
+        response.WriteAsync("{\"error\":\"user not found\"}");
+        return;
+    }
+
+    var accessTokenPayload = new User.User(1, "test") {
+        Name = "test",
+        Avatar = ""
+    };
+
+    var accessToken = jwtService.GenerateAccessToken(accessTokenPayload);
+
+    response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("access_token", accessToken) {
+        HttpOnly = true,
+        // Domain = request.Host.Host,
+        // Path = "/",
+        Expires = DateTimeOffset.Now.AddMinutes(3)
+    }.ToString());
+
+    var redirect = request.Query["redirect"];
+
+    if (redirect != "") {
+        response.StatusCode = StatusCodes.Status301MovedPermanently;
+        response.Redirect(redirect!);
+    } else {
+        response.StatusCode = StatusCodes.Status200OK;
+        response.ContentType = "application/json";
+        response.WriteAsync("{\"access_token\":\"" + accessToken + "\"}");
+    }
+    return;
+});
+
 app.Run();
+
+
+class JwtPayload {
+    public int Sub { get; set; }
+    public DateTime ExpireAt { get; set; }
+}
