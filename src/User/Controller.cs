@@ -8,6 +8,7 @@ public class Controller(Service service) {
     }
 
     public User FindById(int id) {
+        Console.WriteLine("FindById: " + id);
         return service.FindById(id);
     }
 }

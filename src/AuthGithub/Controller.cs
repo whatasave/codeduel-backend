@@ -1,3 +1,5 @@
+using Microsoft.Net.Http.Headers;
+
 namespace AuthGithub;
 
 public class Controller(Service service) {
@@ -8,16 +10,18 @@ public class Controller(Service service) {
         group.MapGet("/callback", Callback);
     }
 
-    public void Login(int id) {
+    public void Login() {
         var resp = new HttpResponseMessage();
 
-        // var cookie = new CookieHeaderValue("session-id", "12345");
+        Console.WriteLine("response: " + resp);
+
+        var cookie = new CookieHeaderValue("session-id", "12345");
         // cookie.Expires = DateTimeOffset.Now.AddDays(1);
         // cookie.Domain = Request.RequestUri.Host;
         // cookie.Path = "/";
+        Console.WriteLine("cookie: " + cookie);
 
-        // resp.Headers.AddCookies(new CookieHeaderValue[] { cookie });
-        // return resp;
+        resp.Headers.Add("set-cookie", cookie.ToString());
 
         // return service.findById(id);
     }
