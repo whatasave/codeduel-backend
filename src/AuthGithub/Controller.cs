@@ -6,14 +6,17 @@ public class Controller {
         this.service = service;
     }
 
-    public Controller(DatabaseContext database) : this(new Service(database)) {
-    }
+    public Controller(DatabaseContext database) : this(new Service(database)) {}
     
     public void Setup(RouteGroupBuilder group) {
-        group.MapGet("/{id}", findById);
+        group.MapGet("/", Login);
+        group.MapGet("/callback", Callback);
     }
 
-    public Entity findById(int id) {
+    public Entity Login(int id) {
+        return service.findById(id);
+    }
+    public Entity Callback(int id) {
         return service.findById(id);
     }
 }
