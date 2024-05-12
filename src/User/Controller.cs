@@ -7,7 +7,7 @@ public class Controller(Service service) {
         group.MapGet("/{id}", FindById);
     }
 
-    public Entity FindById(int id) {
-        return service.findById(id);
+    public User FindById(int id) {
+        return service.FindById(id);
     }
 }
