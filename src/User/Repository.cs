@@ -1,13 +1,8 @@
 namespace User;
 
-public class Repository {
-    private DatabaseContext database;
-
-    public Repository(DatabaseContext database) {
-        this.database = database;
-    }
-    public User findById(int id) {
-        return new User {
+public class Repository(DatabaseContext database) {
+    public Entity findById(int id) {
+        return new Entity {
             Id = 2,
             Username = "johndoe",
             Email = ""

@@ -8,7 +8,7 @@ public class UserDTO {
     public string? Biography { get; init; }
     public string Role { get; init; } = "user";
 
-    public UserDTO(User user) {
+    public UserDTO(Entity user) {
         this.Name = user.Name;
         this.Username = user.Username;
         this.Avatar = user.Avatar;
@@ -24,7 +24,7 @@ public class UserListItemDTO {
     public string? Avatar { get; init; }
     public string Role { get; init; } = "user";
 
-    public UserListItemDTO(User user) {
+    public UserListItemDTO(Entity user) {
         this.Name = user.Name;
         this.Username = user.Username;
         this.Avatar = user.Avatar;
