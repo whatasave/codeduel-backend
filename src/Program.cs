@@ -33,9 +33,9 @@ var database = new DatabaseContext(
 
 var v1 = app.MapGroup("/v1");
 
-// new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
-// new Lobby.Controller(database).SetupRoutes(v1.MapGroup("/lobby"));
-// new Challenge.Controller(database).SetupRoutes(v1.MapGroup("/challenge"));
-// new AuthGithub.Controller(database).SetupRoutes(v1.MapGroup("/auth/github"));
+new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
+new Lobby.Controller(database).SetupRoutes(v1.MapGroup("/lobby"));
+new Challenge.Controller(database).SetupRoutes(v1.MapGroup("/challenge"));
+new AuthGithub.Controller(database).SetupRoutes(v1.MapGroup("/auth/github"));
 
 app.Run();
