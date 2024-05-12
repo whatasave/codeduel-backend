@@ -1,12 +1,12 @@
 namespace User;
-public class Routes {
+public class Controller {
     private Service service;
 
-    public Routes(Service service) {
+    public Controller(Service service) {
         this.service = service;
     }
 
-    public Routes(DatabaseContext database) : this(new Service(database)) {
+    public Controller(DatabaseContext database) : this(new Service(database)) {
     }
     
     public void Setup(RouteGroupBuilder group) {

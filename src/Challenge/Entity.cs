@@ -1,19 +1,27 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Challenge;
-public class Routes {
-    private Service service;
+// CREATE TABLE IF NOT EXISTS ` + "`challenge`" + ` (
+//     id INT unique AUTO_INCREMENT,
+//     owner_id INT NOT NULL,
+//     title VARCHAR(50) NOT NULL,
+//     description VARCHAR(255) NOT NULL,
+//     content LONGTEXT NOT NULL,
+//     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+//     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    public Routes(Service service) {
-        this.service = service;
-    }
+//     PRIMARY KEY (id),
+//     FOREIGN KEY (owner_id) REFERENCES user(id),
+//     UNIQUE INDEX (id)
+// );
 
-    public Routes(DatabaseContext database) : this(new Service(database)) {
-    }
-    
-    public void Setup(RouteGroupBuilder group) {
-        group.MapGet("/{id}", findById);
-    }
-
-    public Challenge findById(int id) {
-        return service.findById(id);
-    }
+public class Entity {
+    [Key]
+    public int Id { get; set; }
+    public int OwnerId { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public string Content { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

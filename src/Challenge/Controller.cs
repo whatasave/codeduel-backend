@@ -1,4 +1,4 @@
-namespace Lobby;
+namespace Challenge;
 public class Controller {
     private Service service;
 
@@ -13,7 +13,7 @@ public class Controller {
         group.MapGet("/{id}", findById);
     }
 
-    public Lobby findById(int id) {
+    public Challenge findById(int id) {
         return service.findById(id);
     }
 }

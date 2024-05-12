@@ -21,7 +21,7 @@ namespace Lobby;
 //     UNIQUE INDEX (uuid)
 // );
 
-class Lobby {
+public class Entity {
     public int Id { get; set; }
     public string Uuid { get; set; }
     public int ChallengeId { get; set; }
@@ -57,7 +57,7 @@ class Lobby {
 //     UNIQUE INDEX (lobby_id, user_id)
 // );
 
-class LobbyUser {
+public class UserEntity {
     public int Id { get; set; }
     public int LobbyId { get; set; }
     public int UserId { get; set; }
@@ -90,33 +90,8 @@ class LobbyUser {
 // 	(5, 'readability', 'The most readable code wins.'),
 // 	(6, 'style', 'The most stylish code wins.');
 
-class Mode {
+public class ModeEntity {
     public int Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-}
-
-
-// CREATE TABLE IF NOT EXISTS language (
-//     id INT unique AUTO_INCREMENT,
-//     name VARCHAR(50) NOT NULL,
-
-//     PRIMARY KEY (id),
-//     UNIQUE INDEX (id),
-//     UNIQUE INDEX (name)
-// );
-// INSERT IGNORE INTO language
-// 	(id, name) VALUES
-// 	(0, 'c'),
-// 	(1, 'cpp'),
-// 	(2, 'java'),
-// 	(3, 'js'),
-// 	(4, 'golang'),
-// 	(5, 'rust'),
-// 	(6, 'ruby'),
-// 	(7, 'python');
-
-class Language {
-    public int Id { get; set; }
-    public string Name { get; set; }
 }

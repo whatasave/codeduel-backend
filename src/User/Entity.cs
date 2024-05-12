@@ -2,7 +2,7 @@ namespace User;
 
 using System.ComponentModel.DataAnnotations;
 
-public class User {
+public class Entity {
     [Key]
     public required int Id { get; set; }
     public string? Name { get; set; }
@@ -13,15 +13,5 @@ public class User {
     public string? Biography { get; set; }
     public string Role { get; set; } = "user";
     public DateTime CreatedAt { get; init; } = DateTime.Now;
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
-}
-
-public class Auth {
-    [Key]
-    public required int Id { get; set; }
-    public required string UserId { get; set; }
-    public required string Provider { get; set; }
-    public required string ProviderId { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }

@@ -1,4 +1,4 @@
-namespace Lobby;
+namespace AuthGithub;
 public class Controller {
     private Service service;
 
@@ -13,7 +13,7 @@ public class Controller {
         group.MapGet("/{id}", findById);
     }
 
-    public Lobby findById(int id) {
+    public Entity findById(int id) {
         return service.findById(id);
     }
 }
