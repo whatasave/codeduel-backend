@@ -9,7 +9,7 @@ public class Service {
     public Service(DatabaseContext database) : this(new Repository(database)) {
     }
 
-    public User findById(int id) {
+    public Entity findById(int id) {
         return repository.findById(id);
     }
 } 
