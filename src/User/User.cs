@@ -1,3 +1,4 @@
+namespace User;
 
 using System.ComponentModel.DataAnnotations;
 
@@ -11,8 +12,8 @@ public class User {
     public string? BackgroundImage { get; set; }
     public string? Biography { get; set; }
     public string Role { get; set; } = "user";
-    public required DateTime CreatedAt { get; init; } = DateTime.Now;
-    public required DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 
 public class Auth {
@@ -21,6 +22,6 @@ public class Auth {
     public required string UserId { get; set; }
     public required string Provider { get; set; }
     public required string ProviderId { get; set; }
-    public required DateTime CreatedAt { get; set; } = DateTime.Now;
-    public required DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
