@@ -1,22 +1,26 @@
+
+using System.ComponentModel.DataAnnotations;
+
 public class User {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string Avatar { get; set; }
-    public string BackgroundImage { get; set; }
-    public string Biography { get; set; }
-    public string Role { get; set; }
-    public Datetime CreatedAt { get; set; }
-    public Datetime UpdatedAt { get; set; }
+    [Key]
+    public required int Id { get; set; }
+    public string? Name { get; set; }
+    public required string Username { get; set; }
+    public required string Email { get; set; }
+    public string? Avatar { get; set; }
+    public string? BackgroundImage { get; set; }
+    public string? Biography { get; set; }
+    public string Role { get; set; } = "user";
+    public required DateTime CreatedAt { get; init; } = DateTime.Now;
+    public required DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 
 public class Auth {
-    public int Id { get; set; }
-    public string UserId { get; set; }
-    public string Provider { get; set; }
-    public string ProviderId { get; set; }
-    public Datetime CreatedAt { get; set; }
-    public Datetime UpdatedAt { get; set; }
+    [Key]
+    public required int Id { get; set; }
+    public required string UserId { get; set; }
+    public required string Provider { get; set; }
+    public required string ProviderId { get; set; }
+    public required DateTime CreatedAt { get; set; } = DateTime.Now;
+    public required DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
-
