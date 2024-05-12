@@ -10,6 +10,7 @@ public record User(
 );
 
 public record UserListItem(
+    int Id,
     string Username,
     string? Name = null,
     string? Avatar = null
