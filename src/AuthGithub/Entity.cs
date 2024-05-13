@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace AuthGithub;
 
 public class Entity {
