@@ -1,7 +1,7 @@
 namespace Challenge;
 
-public class Repository(DatabaseContext database) {
-    public Entity findById(int id) {
-        return new Entity {};
+public class Repository(Database.DatabaseContext database) {
+    public Challenge FindById(int id) {
+        return new(1, new User.UserListItem(1, ""), "title", "description", "content");
     }
 }

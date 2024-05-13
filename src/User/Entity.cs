@@ -3,7 +3,6 @@ namespace User;
 using System.ComponentModel.DataAnnotations;
 
 public class Entity {
-    [Key]
     public required int Id { get; set; }
     public string? Name { get; set; }
     public required string Username { get; set; }

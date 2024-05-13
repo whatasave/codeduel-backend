@@ -5,8 +5,8 @@ using Microsoft.Net.Http.Headers;
 namespace AuthGithub;
 
 public class Controller(Service service) {
-    public Controller(DatabaseContext database) : this(new Service(database)) {}
-    
+    public Controller(Database.DatabaseContext database) : this(new Service(database)) { }
+
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/", Login);
         group.MapGet("/callback", Callback);
@@ -38,7 +38,7 @@ public class Controller(Service service) {
         response.Redirect(url);
         return;
     }
-    
+
     public void Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state)) {
             _ = new StatusCodeResult(StatusCodes.Status400BadRequest);

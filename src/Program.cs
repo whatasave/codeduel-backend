@@ -1,6 +1,5 @@
 using dotenv.net;
 using dotenv.net.Utilities;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 
@@ -12,7 +11,7 @@ var connString = "server=" + EnvReader.GetStringValue("MARIADB_HOST") +
                 ";database=" + EnvReader.GetStringValue("MARIADB_DATABASE") +
                 ";user=" + EnvReader.GetStringValue("MARIADB_USER") +
                 ";password=" + EnvReader.GetStringValue("MARIADB_PASSWORD");
-// builder.Services.AddDbContext<DatabaseContext>(o => o.UseMySql(connString, ServerVersion.AutoDetect(connString)));
+// builder.Services.AddDbContext<Database.DatabaseContext>(o => o.UseMySql(connString, ServerVersion.AutoDetect(connString)));
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAllPolicy", builder => {
@@ -20,7 +19,7 @@ builder.Services.AddCors(options => {
             .WithOrigins(EnvReader.GetStringValue("CORS_ORIGIN"))
             .WithMethods(EnvReader.GetStringValue("CORS_METHODS"))
             .WithHeaders(EnvReader.GetStringValue("CORS_HEADERS"));
-        
+
         if (EnvReader.GetStringValue("CORS_CREDENTIALS") == "true") {
             builder.AllowCredentials();
         }
@@ -29,9 +28,9 @@ builder.Services.AddCors(options => {
 
 var app = builder.Build();
 
-// var database = app.Services.GetRequiredService<DatabaseContext>();
-var database = new DatabaseContext(
-    new DbContextOptionsBuilder<DatabaseContext>()
+// var database = app.Services.GetRequiredService<Database.DatabaseContext>();
+var database = new Database.DatabaseContext(
+    new DbContextOptionsBuilder<Database.DatabaseContext>()
         .UseMySql(connString, ServerVersion.AutoDetect(connString))
         .Options
 );
@@ -49,7 +48,7 @@ v1.MapGet("/health", (HttpRequest request, HttpResponse response) => {
     response.WriteAsync("{\"status\":\"ok\"}");
 });
 
-v1.MapGet("/auth/refresh" , (HttpRequest request, HttpResponse response) => {
+v1.MapGet("/auth/refresh", (HttpRequest request, HttpResponse response) => {
     var refreshToken = request.Cookies["refresh_token"];
     Console.WriteLine("--refresh token: " + refreshToken);
 
@@ -60,12 +59,13 @@ v1.MapGet("/auth/refresh" , (HttpRequest request, HttpResponse response) => {
         return;
     }
 
-    var jwtService = new Jwt.Service(database);
+    var jwtService = new Auth.Service(database);
 
     JwtPayload? jwt = null;
     try {
-        jwt = (JwtPayload?) jwtService.ValidateJwt(refreshToken);
-    } catch (Exception) {
+        jwt = (JwtPayload?)jwtService.ValidateJwt(refreshToken);
+    }
+    catch (Exception) {
         response.StatusCode = StatusCodes.Status401Unauthorized;
         response.ContentType = "application/json";
         response.WriteAsync("{\"error\":\"invalid refresh token\"}");
@@ -110,7 +110,8 @@ v1.MapGet("/auth/refresh" , (HttpRequest request, HttpResponse response) => {
     if (redirect != "") {
         response.StatusCode = StatusCodes.Status301MovedPermanently;
         response.Redirect(redirect!);
-    } else {
+    }
+    else {
         response.StatusCode = StatusCodes.Status200OK;
         response.ContentType = "application/json";
         response.WriteAsync("{\"access_token\":\"" + accessToken + "\"}");

@@ -1,7 +1,6 @@
 namespace AuthGithub;
 
-public class Repository(DatabaseContext database) {
-
+public class Repository(Database.DatabaseContext database) {
     public Entity GetAuthByProviderAndId(string provider, int id) {
         return new Entity {
             Id = 1,

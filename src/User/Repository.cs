@@ -1,6 +1,6 @@
 namespace User;
 
-public class Repository(DatabaseContext database) {
+public class Repository(Database.DatabaseContext database) {
     public User FindById(int id) {
         return new User(id, "Tizio");
     }

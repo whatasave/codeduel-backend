@@ -1,16 +1,17 @@
 namespace AuthGithub;
 
-public class Service(Repository repository, User.Service userService, Jwt.Service jwtService) {
+public class Service(Repository repository, User.Service userService, Auth.Service jwtService) {
 
-    public Service(DatabaseContext database) : this(
+    public Service(Database.DatabaseContext database) : this(
         new Repository(database),
         new User.Service(database),
-        new Jwt.Service(database)
-    ) {}
+        new Auth.Service(database)
+    ) { }
 
     public Entity FindById(int id) {
         return repository.GetAuthByProviderAndId("github", id);
     }
+
     public User.User? GetUserByProviderAndId(string provider, int providerId) {
         var authUser = repository.GetAuthByProviderAndId(provider, providerId);
 
@@ -20,7 +21,7 @@ public class Service(Repository repository, User.Service userService, Jwt.Servic
     }
 
     public User.User CreateAuthUser(GithubUserData user) {
-        var newUser = userService.Create(new (-1, user.Login) {
+        var newUser = userService.Create(new(-1, user.Login) {
             Name = user.Name ?? user.Login,
             Avatar = user.AvatarUrl
         });
@@ -38,12 +39,15 @@ public class Service(Repository repository, User.Service userService, Jwt.Servic
     public Entity AuthenticateWithGithub(int id) {
         return repository.FindById(id);
     }
+
     public string GetAccessToken(string code, string state) {
         return "123456";
     }
+
     public GithubUserData GetUserData(string accessToken) {
         return new GithubUserData();
     }
+
     public List<GithubEmail> GetUserEmails(string accessToken) {
         return [
             new("test1@gh.com",true,true,"private"),
@@ -51,6 +55,7 @@ public class Service(Repository repository, User.Service userService, Jwt.Servic
             new("test3@gh.com",true,false,"public")
         ];
     }
+
     public string? GetUserPrimaryEmail(string accessToken) {
         var emails = GetUserEmails(accessToken);
         var primaryEmail = emails.Find(static e => e.Verified && e.Primary);
@@ -66,4 +71,4 @@ public class Service(Repository repository, User.Service userService, Jwt.Servic
 
         return [accessToken, refreshToken];
     }
-} 
+}

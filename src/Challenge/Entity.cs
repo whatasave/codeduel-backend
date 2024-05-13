@@ -1,27 +1,17 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Challenge;
-// CREATE TABLE IF NOT EXISTS ` + "`challenge`" + ` (
-//     id INT unique AUTO_INCREMENT,
-//     owner_id INT NOT NULL,
-//     title VARCHAR(50) NOT NULL,
-//     description VARCHAR(255) NOT NULL,
-//     content LONGTEXT NOT NULL,
-//     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-//     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-//     PRIMARY KEY (id),
-//     FOREIGN KEY (owner_id) REFERENCES user(id),
-//     UNIQUE INDEX (id)
-// );
 
 public class Entity {
-    [Key]
     public int Id { get; set; }
-    public int OwnerId { get; set; }
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public string Content { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public required User.Entity Owner { get; set; }
+    [MaxLength(50)]
+    public required string Title { get; set; }
+    public required string Description { get; set; }
+    public required string Content { get; set; }
+    [DefaultValue("CURRENT_TIMESTAMP")]
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
+    [DefaultValue("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")]
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }

@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace Lobby;
 // CREATE TABLE IF NOT EXISTS lobby (
 //     id INT AUTO_INCREMENT,
@@ -5,7 +7,7 @@ namespace Lobby;
 //     challenge_id INT NOT NULL,
 //     owner_id INT NOT NULL,
 //     ended BOOLEAN NOT NULL DEFAULT FALSE,
-    
+
 //     mode VARCHAR(50) NOT NULL,
 //     max_players INT NOT NULL,
 //     game_duration INT NOT NULL,
@@ -23,23 +25,25 @@ namespace Lobby;
 
 public class Entity {
     public int Id { get; set; }
-    public string Uuid { get; set; }
-    public int ChallengeId { get; set; }
+    public required string Uuid { get; set; }
+    public required Challenge.Entity Challenge { get; set; }
     public int OwnerId { get; set; }
     public bool Ended { get; set; }
-    public string Mode { get; set; }
-    public int MaxPlayers { get; set; }
-    public int GameDuration { get; set; }
-    public string AllowedLanguages { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public required string Mode { get; set; }
+    public required int MaxPlayers { get; set; }
+    public required int GameDuration { get; set; }
+    public required string AllowedLanguages { get; set; }
+    [DefaultValue("CURRENT_TIMESTAMP")]
+    public DateTime CreatedAt { get; init; } = DateTime.Now;
+    [DefaultValue("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")]
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 
 // CREATE TABLE IF NOT EXISTS lobby_user (
 //     id INT AUTO_INCREMENT,
 //     lobby_id INT NOT NULL,
 //     user_id INT NOT NULL,
-    
+
 //     code TEXT,
 //     language VARCHAR(50),
 //     tests_passed INT NOT NULL DEFAULT 0,
@@ -59,15 +63,17 @@ public class Entity {
 
 public class UserEntity {
     public int Id { get; set; }
-    public int LobbyId { get; set; }
-    public int UserId { get; set; }
-    public string Code { get; set; }
-    public string Language { get; set; }
+    public required int LobbyId { get; set; }
+    public required User.Entity User { get; set; }
+    public required string Code { get; set; }
+    public required string Language { get; set; }
     public int TestsPassed { get; set; }
     public bool ShowCode { get; set; }
-    public int MatchRank { get; set; }
+    public int? MatchRank { get; set; }
     public DateTime SubmittedAt { get; set; }
-    public DateTime CreatedAt { get; set; }
+    [DefaultValue("CURRENT_TIMESTAMP")]
+    public DateTime CreatedAt { get; init; }
+    [DefaultValue("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")]
     public DateTime UpdatedAt { get; set; }
 }
 
@@ -76,7 +82,7 @@ public class UserEntity {
 //     id INT unique AUTO_INCREMENT,
 //     name VARCHAR(50) NOT NULL,
 //     description VARCHAR(255) NOT NULL,
-    
+
 //     PRIMARY KEY (id),
 //     UNIQUE INDEX (id)
 // );
@@ -92,6 +98,6 @@ public class UserEntity {
 
 public class ModeEntity {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public required string Name { get; set; }
+    public required string Description { get; set; }
 }
