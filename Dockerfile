@@ -22,4 +22,4 @@ ENV ASPNETCORE_HTTPS_PORT=443
 
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Backend.dll"]
+ENTRYPOINT ["dotnet", "codeduel-backend.dll"]
