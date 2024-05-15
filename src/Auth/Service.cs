@@ -9,11 +9,7 @@ public class Service(Repository repository) {
         return "token";
     }
 
-    public object ValidateJwt(string token) {
-        if (token != "token") {
-            throw new Exception("Invalid token");
-        }
-
+    public RefreshTokenPayload ValidateRefreshToken(string token) {
         // var jwt = ParseJwt(token);
         // if (jwt.ExpireAt < DateTime.Now) {
         //     throw new Exception("Token expired");
@@ -21,17 +17,7 @@ public class Service(Repository repository) {
 
         // return jwt;
 
-        return new JwtPayload {
-            Sub = 1,
-            ExpireAt = DateTime.Now.AddHours(1),
-        };
-    }
-
-    public object ParseJwt(string Token) {
-        return new {
-            Sub = 1,
-            ExpireAt = DateTime.Now.AddHours(1),
-        };
+        return new(1, DateTime.Now.AddHours(1));
     }
 
     public string GenerateRefreshToken(User.User user) {
