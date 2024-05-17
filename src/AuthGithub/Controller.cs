@@ -5,7 +5,7 @@ using Microsoft.Net.Http.Headers;
 namespace AuthGithub;
 
 public class Controller(Config.Config config, Service service) {
-    public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(database)) { }
+    public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) { }
 
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/", Login);
@@ -25,8 +25,8 @@ public class Controller(Config.Config config, Service service) {
 
         var githubAuthUrl = "https://github.com/login/oauth/authorize";
         var query = new QueryBuilder() {
-            { "client_id", Environment.GetEnvironmentVariable("AUTH_GITHUB_CLIENT_ID") ?? "null" },
-            { "redirect_uri", Environment.GetEnvironmentVariable("AUTH_GITHUB_CLIENT_CALLBACK_URL") ?? "http://127.0.0.1:5000/v1/auth/github/callback" },
+            { "client_id", config.Auth.Github.ClientId },
+            { "redirect_uri", config.Auth.Github.CallbackUrl },
             { "state", state },
             { "scope", "user:email" },
             { "allow_signup", "true" }

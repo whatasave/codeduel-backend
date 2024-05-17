@@ -5,11 +5,13 @@ namespace Database;
 
 public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options) {
     public DbSet<User.Entity> Users { get; set; }
-    public DbSet<AuthGithub.Entity> Auths { get; set; }
+    public DbSet<AuthGithub.Entity> GithubAuthentications { get; set; }
     public DbSet<Lobby.Entity> Lobbies { get; set; }
     public DbSet<Lobby.UserEntity> LobbiesUsers { get; set; }
     public DbSet<Lobby.ModeEntity> LobbiesModes { get; set; }
     public DbSet<Challenge.Entity> Challenges { get; set; }
+    public DbSet<Permissions.Entity> Permissions { get; set; }
+    public DbSet<Auth.Entity> Authentications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         //    modelBuilder.Entity<User.Entity>()

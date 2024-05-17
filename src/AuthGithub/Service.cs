@@ -2,10 +2,10 @@ namespace AuthGithub;
 
 public class Service(Repository repository, User.Service userService, Auth.Service jwtService) {
 
-    public Service(Database.DatabaseContext database) : this(
+    public Service(Config.Config config, Database.DatabaseContext database) : this(
         new Repository(database),
         new User.Service(database),
-        new Auth.Service(database)
+        new Auth.Service(config, database)
     ) { }
 
     public Entity FindById(int id) {

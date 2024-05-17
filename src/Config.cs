@@ -73,6 +73,7 @@ public record Cookie(
 }
 
 public record Auth(
+    Github Github,
     TimeSpan AccessTokenExpires,
     TimeSpan RefreshTokenExpires,
     string AccessTokenCookieName,
@@ -83,6 +84,7 @@ public record Auth(
 ) {
     public static Auth FromEnv() {
         return new Auth(
+            Github.FromEnv(),
             Env.GetTimeSpan("ACCESS_TOKEN_EXPIRES", TimeSpan.FromMinutes(3)),
             Env.GetTimeSpan("REFRESH_TOKEN_EXPIRES", TimeSpan.FromDays(30)),
             Env.GetString("ACCESS_TOKEN_COOKIE_NAME", "access_token"),
@@ -90,6 +92,20 @@ public record Auth(
             Env.GetString("JWT_ISSUER", "codeduel.it"),
             Env.GetString("SECRET", "secret"),
             Env.GetString("LOGIN_REDIRECT", "http://localhost:5173/login")
+        );
+    }
+}
+
+public record Github(
+        string ClientId,
+        string ClientSecret,
+        string CallbackUrl
+    ) {
+    public static Github FromEnv() {
+        return new Github(
+            Env.GetString("AUTH_GITHUB_CLIENT_ID", ""),
+            Env.GetString("AUTH_GITHUB_CLIENT_SECRET", ""),
+            Env.GetString("AUTH_GITHUB_CLIENT_CALLBACK_URL", "http://127.0.0.1:5000/v1/auth/github/callback")
         );
     }
 }
