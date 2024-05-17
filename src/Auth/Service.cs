@@ -9,26 +9,47 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
 
     public Service(Config.Config config, Database.DatabaseContext database) : this(config, new Repository(database), new Permissions.Service(database)) { }
 
-    public string CreateJwt(int userId) {
-        return "token";
+    public RefreshTokenPayload ValidateRefreshToken(string token) {
+        var claims = jwt.ValidateToken(
+            token,
+            new TokenValidationParameters {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret))
+            },
+            out SecurityToken validatedToken
+        );
+        var userId = int.Parse(claims.Claims.First(c => c.Type == "sub").Value);
+        return new(userId);
     }
 
-    public RefreshTokenPayload ValidateRefreshToken(string token) {
-        // var jwt = ParseJwt(token);
-        // if (jwt.ExpireAt < DateTime.Now) {
-        //     throw new Exception("Token expired");
-        // }
-
-        // return jwt;
-
-        return new(1, DateTime.Now.AddHours(1));
+    public AccessTokenPayload ValidateAccessToken(string token) {
+        var claims = jwt.ValidateToken(
+            token,
+            new TokenValidationParameters {
+                ValidateIssuer = true,
+                ValidIssuer = config.Auth.JwtIssuer,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret))
+            },
+            out SecurityToken validatedToken
+        );
+        var userId = int.Parse(claims.Claims.First(c => c.Type == "sub").Value);
+        var username = claims.Claims.First(c => c.Type == "username").Value;
+        var perms = int.Parse(claims.Claims.First(c => c.Type == "perms").Value);
+        var permissions = new Permissions.UserPermissions(perms);
+        return new(userId, username, permissions);
     }
 
     public string GenerateRefreshToken(User.User user) {
         return jwt.WriteToken(
             new JwtSecurityToken(
                 claims: [
-                    new("sub", user.Id.ToString())
+                    new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32)
                 ],
                 expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
                 signingCredentials: new SigningCredentials(
@@ -43,7 +64,7 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
         return jwt.WriteToken(
             new JwtSecurityToken(
                 claims: [
-                    new("sub", user.Id.ToString()),
+                    new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32),
                     new("username", user.Username),
                     new("perms", permissions.FindCompactByUserId(user.Id).ToString())
                 ],

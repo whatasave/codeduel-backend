@@ -31,4 +31,6 @@ public record Permissions(
 public record UserPermissions(
     int CompactNotation,
     Permissions Permissions
-);
+) {
+    public UserPermissions(int compactNotation) : this(compactNotation, Permissions.FromCompactNotation(compactNotation)) { }
+}

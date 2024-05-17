@@ -4,7 +4,7 @@ using Microsoft.Net.Http.Headers;
 namespace Auth;
 
 public class Controller(Config.Config config, Service service, User.Service userService) {
-    public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(database), new User.Service(database)) { }
+    public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database), new User.Service(database)) { }
 
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/refresh", RefreshToken);
@@ -40,7 +40,7 @@ public class Controller(Config.Config config, Service service, User.Service user
             return Results.Unauthorized();
         }
 
-        var user = userService.FindById(jwt.Sub);
+        var user = userService.FindById(jwt.UserId);
         if (user == null) {
             return Results.Unauthorized();
         }
