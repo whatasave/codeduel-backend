@@ -1,9 +1,13 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+
 namespace Auth;
 
-public class Service(Repository repository) {
-    public Service(Database.DatabaseContext database) : this(
-        new Repository(database)
-    ) { }
+public class Service(Config.Config config, Repository repository, Permissions.Service permissions) {
+    private JwtSecurityTokenHandler jwt = new();
+
+    public Service(Config.Config config, Database.DatabaseContext database) : this(config, new Repository(database), new Permissions.Service(database)) { }
 
     public string CreateJwt(int userId) {
         return "token";
@@ -21,11 +25,36 @@ public class Service(Repository repository) {
     }
 
     public string GenerateRefreshToken(User.User user) {
-        return CreateJwt(user.Id);
+        return jwt.WriteToken(
+            new JwtSecurityToken(
+                claims: [
+                    new("sub", user.Id.ToString())
+                ],
+                expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret)),
+                    SecurityAlgorithms.HmacSha256
+                )
+            )
+        );
     }
 
     public string GenerateAccessToken(User.User user) {
-        return CreateJwt(user.Id);
+        return jwt.WriteToken(
+            new JwtSecurityToken(
+                claims: [
+                    new("sub", user.Id.ToString()),
+                    new("username", user.Username),
+                    new("perms", permissions.FindCompactByUserId(user.Id).ToString())
+                ],
+                issuer: config.Auth.JwtIssuer,
+                expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret)),
+                    SecurityAlgorithms.HmacSha256
+                )
+            )
+        );
     }
 
     public void SaveRefreshToken(int userId, string refreshToken) {

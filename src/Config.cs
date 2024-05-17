@@ -77,6 +77,7 @@ public record Auth(
     TimeSpan RefreshTokenExpires,
     string AccessTokenCookieName,
     string RefreshTokenCookieName,
+    string JwtIssuer,
     string Secret
 ) {
     public static Auth FromEnv() {
@@ -85,6 +86,7 @@ public record Auth(
             Env.GetTimeSpan("REFRESH_TOKEN_EXPIRES", TimeSpan.FromDays(30)),
             Env.GetString("ACCESS_TOKEN_COOKIE_NAME", "access_token"),
             Env.GetString("REFRESH_TOKEN_COOKIE_NAME", "refresh_token"),
+            Env.GetString("JWT_ISSUER", "codeduel.it"),
             Env.GetString("SECRET", "secret")
         );
     }
