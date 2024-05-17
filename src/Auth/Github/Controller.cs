@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 
-namespace AuthGithub;
+namespace Auth.Github;
 
 public class Controller(Config.Config config, Service service) {
     public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) { }

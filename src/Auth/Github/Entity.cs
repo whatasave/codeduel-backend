@@ -1,4 +1,4 @@
-namespace AuthGithub;
+namespace Auth.Github;
 
 public class Entity {
     public required int Id { get; set; }

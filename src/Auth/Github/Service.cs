@@ -1,4 +1,4 @@
-namespace AuthGithub;
+namespace Auth.Github;
 
 public class Service(Repository repository, User.Service userService, Auth.Service jwtService) {
 

@@ -1,4 +1,4 @@
-namespace AuthGithub;
+namespace Auth.Github;
 
 public record GithubUserData(
     string Login = "",

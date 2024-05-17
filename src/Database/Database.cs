@@ -5,7 +5,7 @@ namespace Database;
 
 public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options) {
     public DbSet<User.Entity> Users { get; set; }
-    public DbSet<AuthGithub.Entity> GithubAuthentications { get; set; }
+    public DbSet<Auth.Github.Entity> GithubAuthentications { get; set; }
     public DbSet<Lobby.Entity> Lobbies { get; set; }
     public DbSet<Lobby.UserEntity> LobbiesUsers { get; set; }
     public DbSet<Lobby.ModeEntity> LobbiesModes { get; set; }
