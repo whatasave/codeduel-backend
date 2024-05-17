@@ -4,25 +4,24 @@ using Microsoft.Net.Http.Headers;
 
 namespace AuthGithub;
 
-public class Controller(Service service) {
-    public Controller(Database.DatabaseContext database) : this(new Service(database)) { }
+public class Controller(Config.Config config, Service service) {
+    public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(database)) { }
 
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/", Login);
         group.MapGet("/callback", Callback);
     }
 
-    public void Login(HttpRequest request, HttpResponse response) {
+    public IResult Login(HttpRequest request, HttpResponse response) {
         var state = Guid.NewGuid().ToString();
 
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("oauth_state", state) {
-            HttpOnly = Environment.GetEnvironmentVariable("COOKIE_HTTP_ONLY") == "true",
-            Domain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN") ?? request.Host.Host,
-            Path = Environment.GetEnvironmentVariable("COOKIE_PATH") ?? "/",
-            Secure = Environment.GetEnvironmentVariable("COOKIE_SECURE") == "true",
+            HttpOnly = config.Cookie.HttpOnly,
+            Domain = config.Cookie.Domain,
+            Path = config.Cookie.Path,
+            Secure = config.Cookie.Secure,
             Expires = DateTimeOffset.Now.AddSeconds(60)
         }.ToString());
-
 
         var githubAuthUrl = "https://github.com/login/oauth/authorize";
         var query = new QueryBuilder() {
@@ -33,38 +32,32 @@ public class Controller(Service service) {
             { "allow_signup", "true" }
         };
         var url = githubAuthUrl + query;
-        response.StatusCode = StatusCodes.Status307TemporaryRedirect;
-        // response.Headers.Append("Location", url);
-        response.Redirect(url);
-        return;
+        return Results.Redirect(url);
     }
 
-    public void Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
+    public IResult Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state)) {
-            _ = new StatusCodeResult(StatusCodes.Status400BadRequest);
             Console.Error.WriteLine("[Auth Github] Missing code or state");
-            return;
+            return Results.Redirect(config.Auth.LoginRedirect + "?error=5001");
         }
 
         var cookie = request.Cookies["oauth_state"];
         if (cookie != state) {
             _ = new StatusCodeResult(StatusCodes.Status400BadRequest);
             Console.Error.WriteLine("[Auth Github] state mismatch");
-            return;
+            return Results.Redirect(config.Auth.LoginRedirect + "?error=5002");
         }
 
         var ghAccessToken = service.GetAccessToken(code, state);
         if (ghAccessToken == null) {
-            _ = new StatusCodeResult(StatusCodes.Status500InternalServerError);
             Console.Error.WriteLine("[Auth Github] Failed to get access token");
-            return;
+            return Results.Redirect(config.Auth.LoginRedirect + "?error=5003");
         }
 
         var userData = service.GetUserData(ghAccessToken);
         if (userData == null) {
-            _ = new StatusCodeResult(StatusCodes.Status500InternalServerError);
             Console.Error.WriteLine("[Auth Github] Failed to get user data");
-            return;
+            return Results.Redirect(config.Auth.LoginRedirect + "?error=5004");
         }
 
         var user = service.GetUserByProviderAndId("github", userData.Id);
@@ -73,9 +66,8 @@ public class Controller(Service service) {
             if (userData.Email == null) {
                 var primaryEmail = service.GetUserPrimaryEmail(ghAccessToken);
                 if (primaryEmail == null) {
-                    _ = new StatusCodeResult(StatusCodes.Status500InternalServerError);
                     Console.Error.WriteLine("[Auth Github] Failed to get user emails");
-                    return;
+                    return Results.Redirect(config.Auth.LoginRedirect + "?error=5005");
                 }
 
                 userData = userData with { Email = primaryEmail };
@@ -86,20 +78,14 @@ public class Controller(Service service) {
 
         var refreshToken = service.GenerateTokens(user)[1];
 
-        Console.WriteLine("[Auth Github] User logged in: " + user.Username);
-        Console.WriteLine("[Auth Github] Refresh token: " + refreshToken);
-        // storing tokens in cookies
-        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("refresh_token", refreshToken) {
-            HttpOnly = Environment.GetEnvironmentVariable("COOKIE_HTTP_ONLY") == "true",
-            Domain = Environment.GetEnvironmentVariable("COOKIE_DOMAIN") ?? request.Host.Host,
-            Path = Environment.GetEnvironmentVariable("COOKIE_PATH") ?? "/",
-            Secure = Environment.GetEnvironmentVariable("COOKIE_SECURE") == "true",
-            Expires = DateTimeOffset.Now.AddMinutes(int.Parse(Environment.GetEnvironmentVariable("JWT_REFRESH_TOKEN_EXPIRES_IN_MINUTES") ?? "43200"))
+        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, refreshToken) {
+            HttpOnly = config.Cookie.HttpOnly,
+            Domain = config.Cookie.Domain,
+            Path = config.Cookie.Path,
+            Secure = config.Cookie.Secure,
+            Expires = DateTimeOffset.Now.Add(config.Auth.RefreshTokenExpires)
         }.ToString());
 
-        var frontendRedirect = request.Cookies["return_to"] ?? Environment.GetEnvironmentVariable("FRONTEND_URL_AUTH_CALLBACK");
-        response.Redirect("http://127.0.0.1:5000/v1/auth/refresh?redirect=" + frontendRedirect);
-        _ = new StatusCodeResult(StatusCodes.Status308PermanentRedirect);
-        return;
+        return Results.Redirect(request.Cookies["return_to"] ?? config.Auth.LoginRedirect);
     }
 }

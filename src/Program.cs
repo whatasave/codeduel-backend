@@ -38,7 +38,8 @@ v1.MapGet("/health", (HttpRequest request, HttpResponse response) => {
 new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
 new Lobby.Controller(database).SetupRoutes(v1.MapGroup("/lobby"));
 new Challenge.Controller(database).SetupRoutes(v1.MapGroup("/challenge"));
-new AuthGithub.Controller(database).SetupRoutes(v1.MapGroup("/auth/github"));
+new AuthGithub.Controller(config, database).SetupRoutes(v1.MapGroup("/auth/github"));
 new Auth.Controller(config, database).SetupRoutes(v1.MapGroup("/auth"));
+new Permissions.Controller(database).SetupRoutes(v1.MapGroup("/user/permissions"));
 
 app.Run();
