@@ -1,10 +1,13 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Challenge;
 
+[Table("challenge")]
 public class Entity {
-    public int Id { get; set; }
+    [Key]
+    public required int Id { get; set; }
     public required User.Entity Owner { get; set; }
     [MaxLength(50)]
     public required string Title { get; set; }

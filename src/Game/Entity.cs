@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Lobby;
 // CREATE TABLE IF NOT EXISTS lobby (
@@ -23,9 +25,11 @@ namespace Lobby;
 //     UNIQUE INDEX (uuid)
 // );
 
+[Table("game")]
 public class Entity {
-    public int Id { get; set; }
-    public required string Uuid { get; set; }
+    [Key]
+    public required int Id { get; set; }
+    public required string UniqueId { get; set; }
     public required Challenge.Entity Challenge { get; set; }
     public int OwnerId { get; set; }
     public bool Ended { get; set; }
@@ -61,8 +65,10 @@ public class Entity {
 //     UNIQUE INDEX (lobby_id, user_id)
 // );
 
+[Table("game_user")]
 public class UserEntity {
-    public int Id { get; set; }
+    [Key]
+    public required int Id { get; set; }
     public required int LobbyId { get; set; }
     public required User.Entity User { get; set; }
     public required string Code { get; set; }
@@ -96,8 +102,10 @@ public class UserEntity {
 // 	(5, 'readability', 'The most readable code wins.'),
 // 	(6, 'style', 'The most stylish code wins.');
 
+[Table("game_mode")]
 public class ModeEntity {
-    public int Id { get; set; }
+    [Key]
+    public required int Id { get; set; }
     public required string Name { get; set; }
     public required string Description { get; set; }
 }
