@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 var config = Config.Config.FromEnv();
 var builder = WebApplication.CreateBuilder(args);
 var connString = config.Database.ConnectionString();
-// builder.Services.AddDbContext<Database.DatabaseContext>(o => o.UseMySql(connString, ServerVersion.AutoDetect(connString)));
+builder.Services.AddDbContext<Database.DatabaseContext>(o => o.UseMySql(connString, ServerVersion.AutoDetect(connString)));
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAllPolicy", builder => {
@@ -21,11 +21,7 @@ builder.Services.AddCors(options => {
 var app = builder.Build();
 
 // var database = app.Services.GetRequiredService<Database.DatabaseContext>();
-var database = new Database.DatabaseContext(
-    new DbContextOptionsBuilder<Database.DatabaseContext>()
-        .UseMySql(connString, ServerVersion.AutoDetect(connString))
-        .Options
-);
+var database = app.Services.GetRequiredService<Database.DatabaseContext>();
 
 var v1 = app.MapGroup("/v1");
 

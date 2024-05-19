@@ -90,7 +90,7 @@ public record Auth(
             Env.GetString("ACCESS_TOKEN_COOKIE_NAME", "access_token"),
             Env.GetString("REFRESH_TOKEN_COOKIE_NAME", "refresh_token"),
             Env.GetString("JWT_ISSUER", "codeduel.it"),
-            Env.GetString("SECRET", "secret"),
+            Env.GetString("JWT_SECRET", "secret"),
             Env.GetString("LOGIN_REDIRECT", "http://localhost:5173/login")
         );
     }
