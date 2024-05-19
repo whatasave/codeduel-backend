@@ -3,7 +3,16 @@ using Microsoft.EntityFrameworkCore;
 var config = Config.Config.FromEnv();
 var builder = WebApplication.CreateBuilder(args);
 var connString = config.Database.ConnectionString();
-builder.Services.AddDbContext<Database.DatabaseContext>(o => o.UseMySql(connString, ServerVersion.AutoDetect(connString)));
+var database = new Database.DatabaseContext(
+    new DbContextOptionsBuilder<Database.DatabaseContext>()
+        .UseMySql(connString, ServerVersion.AutoDetect(connString))
+        .Options
+);
+
+builder.Services.AddScoped(_ => database);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAllPolicy", builder => {
@@ -20,16 +29,14 @@ builder.Services.AddCors(options => {
 
 var app = builder.Build();
 
-// var database = app.Services.GetRequiredService<Database.DatabaseContext>();
-var database = app.Services.GetRequiredService<Database.DatabaseContext>();
+if (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 var v1 = app.MapGroup("/v1");
 
-v1.MapGet("/health", (HttpRequest request, HttpResponse response) => {
-    response.StatusCode = StatusCodes.Status200OK;
-    response.ContentType = "application/json";
-    response.WriteAsync("{\"status\":\"ok\"}");
-});
+v1.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
 new Lobby.Controller(database).SetupRoutes(v1.MapGroup("/lobby"));
