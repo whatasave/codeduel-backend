@@ -8,7 +8,7 @@ public class Service(Repository repository) {
         return repository.FindById(id);
     }
 
-    public User Create(User user) {
+    public User Create(CreateUser user) {
         return repository.Create(user);
     }
 }

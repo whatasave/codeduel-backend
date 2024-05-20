@@ -7,8 +7,8 @@ namespace Auth;
 [PrimaryKey(nameof(UserId), nameof(Provider))]
 [Index(nameof(UserId), nameof(ProviderId), IsUnique = true, IsDescending = [true, false])]
 public class Entity {
-    public int UserId { get; set; }
-    public required string Provider { get; set; } = "";
+    public required int UserId { get; set; }
+    public required string Provider { get; set; }
     public required int ProviderId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;

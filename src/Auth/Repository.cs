@@ -4,8 +4,13 @@ public class Repository(Database.DatabaseContext database) {
     public Entity? GetAuthByProviderAndId(string provider, int providerId) {
         return database.Authentications.Find(provider, providerId);
     }
-    public Entity Create(Entity authUser) {
-        return database.Authentications.Add(authUser).Entity;
+    public UserAuth Create(CreateAuth authUser) {
+        var entry = database.Authentications.Add(new() {
+            UserId = authUser.UserId,
+            Provider = authUser.Provider,
+            ProviderId = authUser.ProviderId
+        });
+        return new UserAuth(entry.Entity);
     }
     public Entity? FindById(int id) {
         return database.Authentications.Find(id);

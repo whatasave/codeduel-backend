@@ -5,6 +5,7 @@ using System.Text.Json;
 namespace Auth.Github;
 
 public class Service(Repository repository, Config.Config config, User.Service userService) {
+    public const string PROVIDER = "github";
 
     public Service(Config.Config config, Database.DatabaseContext database) : this(
         new Repository(database),
@@ -13,27 +14,26 @@ public class Service(Repository repository, Config.Config config, User.Service u
     ) { }
 
     public Entity? FindById(int providerId) {
-        return repository.GetAuthByProviderAndId("github", providerId);
+        return repository.GetAuthByProviderAndId(PROVIDER, providerId);
     }
 
     public User.User? GetUserByProviderId(int providerId) {
-        var authUser = repository.GetAuthByProviderAndId("github", providerId);
+        var authUser = repository.GetAuthByProviderAndId(PROVIDER, providerId);
         if (authUser == null) return null;
 
         return userService.FindById(authUser.UserId);
     }
 
     public User.User Create(GithubUserData user) {
-        var newUser = userService.Create(new(-1, user.Login) {
-            Name = user.Name ?? user.Login,
+        var newUser = userService.Create(new(user.Login, user.Name ?? user.Login) {
             Avatar = user.AvatarUrl
         });
 
-        repository.Create(new Entity {
-            UserId = newUser.Id,
-            Provider = "github",
-            ProviderId = user.Id
-        });
+        repository.Create(new(
+            newUser.Id,
+            PROVIDER,
+            user.Id
+        ));
 
         return newUser;
     }
