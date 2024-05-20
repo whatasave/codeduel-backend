@@ -40,3 +40,9 @@ public record GithubEmail(
     bool Primary,
     string Visibility
 );
+
+public record GithubAccessToken(
+    string AccessToken,
+    string TokenType,
+    string Scope
+);

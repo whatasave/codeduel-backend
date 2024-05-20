@@ -1,10 +1,21 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Auth;
-
 [Table("auth")]
+[PrimaryKey(nameof(UserId), nameof(Provider))]
+[Index(nameof(UserId), nameof(ProviderId), IsUnique = true, IsDescending = [true, false])]
 public class Entity {
+    public int UserId { get; set; }
+    public required string Provider { get; set; } = "";
+    public required int ProviderId { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+}
+
+[Table("auth_refresh_token")]
+public class RefreshTokenEntity {
     [Key]
     public required int Id { get; set; }
     public required User.Entity User { get; set; }

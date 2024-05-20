@@ -78,6 +78,15 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
         );
     }
 
+    public TokenPair GenerateTokens(User.User user) {
+        var refreshToken = GenerateRefreshToken(user);
+        var accessToken = GenerateAccessToken(user);
+
+        SaveRefreshToken(user.Id, refreshToken);
+
+        return new(accessToken, refreshToken);
+    }
+
     public void SaveRefreshToken(int userId, string refreshToken) {
         repository.SaveRefreshToken(userId, refreshToken);
     }

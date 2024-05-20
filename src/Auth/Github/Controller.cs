@@ -4,8 +4,12 @@ using Microsoft.Net.Http.Headers;
 
 namespace Auth.Github;
 
-public class Controller(Config.Config config, Service service) {
-    public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) { }
+public class Controller(Config.Config config, Service service, Auth.Service authService) {
+    public Controller(Config.Config config, Database.DatabaseContext database) : this(
+        config,
+        new Service(config, database),
+        new Auth.Service(config, database)
+    ) {}
 
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/", Login);
@@ -35,7 +39,7 @@ public class Controller(Config.Config config, Service service) {
         return Results.Redirect(url);
     }
 
-    public IResult Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
+    public async Task<IResult> Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state)) {
             Console.Error.WriteLine("[Auth Github] Missing code or state");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5001");
@@ -48,23 +52,23 @@ public class Controller(Config.Config config, Service service) {
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5002");
         }
 
-        var ghAccessToken = service.GetAccessToken(code, state);
+        var ghAccessToken = await service.GetAccessToken(code, state);
         if (ghAccessToken == null) {
             Console.Error.WriteLine("[Auth Github] Failed to get access token");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5003");
         }
 
-        var userData = service.GetUserData(ghAccessToken);
+        var userData = await service.GetUserData(ghAccessToken.AccessToken);
         if (userData == null) {
             Console.Error.WriteLine("[Auth Github] Failed to get user data");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5004");
         }
 
-        var user = service.GetUserByProviderAndId("github", userData.Id);
+        var user = service.GetUserByProviderId(userData.Id);
 
         if (user == null) {
             if (userData.Email == null) {
-                var primaryEmail = service.GetUserPrimaryEmail(ghAccessToken);
+                var primaryEmail = await service.GetUserPrimaryEmail(ghAccessToken.AccessToken);
                 if (primaryEmail == null) {
                     Console.Error.WriteLine("[Auth Github] Failed to get user emails");
                     return Results.Redirect(config.Auth.LoginRedirect + "?error=5005");
@@ -73,17 +77,25 @@ public class Controller(Config.Config config, Service service) {
                 userData = userData with { Email = primaryEmail };
             }
 
-            user = service.CreateAuthUser(userData);
+            user = service.Create(userData);
         }
 
-        var refreshToken = service.GenerateTokens(user)[1];
+        var tokens = authService.GenerateTokens(user);
 
-        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, refreshToken) {
+        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, tokens.RefreshToken) {
             HttpOnly = config.Cookie.HttpOnly,
             Domain = config.Cookie.Domain,
             Path = config.Cookie.Path,
             Secure = config.Cookie.Secure,
             Expires = DateTimeOffset.Now.Add(config.Auth.RefreshTokenExpires)
+        }.ToString());
+
+        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.AccessTokenCookieName, tokens.AccessToken) {
+            HttpOnly = config.Cookie.HttpOnly,
+            Domain = config.Cookie.Domain,
+            Path = config.Cookie.Path,
+            Secure = config.Cookie.Secure,
+            Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
         }.ToString());
 
         return Results.Redirect(request.Cookies["return_to"] ?? config.Auth.LoginRedirect);

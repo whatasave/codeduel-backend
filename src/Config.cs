@@ -32,7 +32,7 @@ public record Database(
             Env.GetString("DB_PORT", "3306"),
             Env.GetString("DB_NAME", "codeduel"),
             Env.GetString("DB_USER", "codeduel"),
-            Env.GetString("DB_PASSWORD", "codeduel")
+            Env.GetString("DB_PASS", "codeduel")
         );
     }
     public string ConnectionString() {

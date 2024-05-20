@@ -1,33 +1,35 @@
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text.Json;
+
 namespace Auth.Github;
 
-public class Service(Repository repository, User.Service userService, Auth.Service jwtService) {
+public class Service(Repository repository, Config.Config config, User.Service userService) {
 
     public Service(Config.Config config, Database.DatabaseContext database) : this(
         new Repository(database),
-        new User.Service(database),
-        new Auth.Service(config, database)
+        config,
+        new User.Service(database)
     ) { }
 
-    public Entity FindById(int id) {
-        return repository.GetAuthByProviderAndId("github", id);
+    public Entity? FindById(int providerId) {
+        return repository.GetAuthByProviderAndId("github", providerId);
     }
 
-    public User.User? GetUserByProviderAndId(string provider, int providerId) {
-        var authUser = repository.GetAuthByProviderAndId(provider, providerId);
-
+    public User.User? GetUserByProviderId(int providerId) {
+        var authUser = repository.GetAuthByProviderAndId("github", providerId);
         if (authUser == null) return null;
 
         return userService.FindById(authUser.UserId);
     }
 
-    public User.User CreateAuthUser(GithubUserData user) {
+    public User.User Create(GithubUserData user) {
         var newUser = userService.Create(new(-1, user.Login) {
             Name = user.Name ?? user.Login,
             Avatar = user.AvatarUrl
         });
 
         repository.Create(new Entity {
-            Id = -1,
             UserId = newUser.Id,
             Provider = "github",
             ProviderId = user.Id
@@ -36,39 +38,48 @@ public class Service(Repository repository, User.Service userService, Auth.Servi
         return newUser;
     }
 
-    public Entity AuthenticateWithGithub(int id) {
-        return repository.FindById(id);
+    public async Task<GithubAccessToken?> GetAccessToken(string code, string state) {
+        var client = new HttpClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        request.Content = new FormUrlEncodedContent(new Dictionary<string, string> {
+            { "client_id", config.Auth.Github.ClientId },
+            { "client_secret", config.Auth.Github.ClientSecret },
+            { "code", code },
+            { "state", state }
+        });
+        using var response = await client.SendAsync(request);
+        using var responseStream = await response.Content.ReadAsStreamAsync();
+
+        return await JsonSerializer.DeserializeAsync<GithubAccessToken>(responseStream);
     }
 
-    public string GetAccessToken(string code, string state) {
-        return "123456";
+    public async Task<GithubUserData?> GetUserData(string accessToken) {
+        var client = new HttpClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        using HttpResponseMessage response = await client.SendAsync(request);
+
+        using var responseStream = await response.Content.ReadAsStreamAsync();
+        return await JsonSerializer.DeserializeAsync<GithubUserData>(responseStream);
     }
 
-    public GithubUserData GetUserData(string accessToken) {
-        return new GithubUserData();
+    public async Task<List<GithubEmail>?> GetUserEmails(string accessToken) {
+        var client = new HttpClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user/emails");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        using HttpResponseMessage response = await client.SendAsync(request);
+
+        using var responseStream = await response.Content.ReadAsStreamAsync();
+        return await JsonSerializer.DeserializeAsync<List<GithubEmail>>(responseStream);
     }
 
-    public List<GithubEmail> GetUserEmails(string accessToken) {
-        return [
-            new("test1@gh.com",true,true,"private"),
-            new("test2@gh.com",true,false,"private"),
-            new("test3@gh.com",true,false,"public")
-        ];
-    }
+    public async Task<string?> GetUserPrimaryEmail(string accessToken) {
+        var emails = await GetUserEmails(accessToken);
+        if (emails == null) return null;
 
-    public string? GetUserPrimaryEmail(string accessToken) {
-        var emails = GetUserEmails(accessToken);
         var primaryEmail = emails.Find(static e => e.Verified && e.Primary);
 
         return primaryEmail?.Email;
-    }
-
-    public string[] GenerateTokens(User.User user) {
-        var refreshToken = jwtService.GenerateRefreshToken(user);
-        var accessToken = jwtService.GenerateAccessToken(user);
-
-        jwtService.SaveRefreshToken(user.Id, refreshToken);
-
-        return [accessToken, refreshToken];
     }
 }
