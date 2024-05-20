@@ -1,4 +1,4 @@
-namespace Lobby;
+namespace Game;
 public class Controller(Service service) {
     public Controller(Database.DatabaseContext database) : this(new Service(database)) {
     }
@@ -7,7 +7,7 @@ public class Controller(Service service) {
         group.MapGet("/{id}", FindById);
     }
 
-    public Lobby FindById(int id) {
+    public Game FindById(int id) {
         return service.FindById(id);
     }
 }

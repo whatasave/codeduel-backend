@@ -1,6 +1,6 @@
-namespace Lobby;
+namespace Game;
 
-public record Lobby(
+public record Game(
     int Id,
     string Uuid,
     Challenge.Challenge Challenge,

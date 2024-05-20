@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Lobby;
+namespace Game;
 // CREATE TABLE IF NOT EXISTS lobby (
 //     id INT AUTO_INCREMENT,
 //     uuid VARCHAR(255) NOT NULL,
@@ -28,7 +28,7 @@ namespace Lobby;
 [Table("game")]
 public class Entity {
     [Key]
-    public required int Id { get; set; }
+    public int Id { get; set; }
     public required string UniqueId { get; set; }
     public required Challenge.Entity Challenge { get; set; }
     public int OwnerId { get; set; }
@@ -68,7 +68,7 @@ public class Entity {
 [Table("game_user")]
 public class UserEntity {
     [Key]
-    public required int Id { get; set; }
+    public int Id { get; set; }
     public required int LobbyId { get; set; }
     public required User.Entity User { get; set; }
     public required string Code { get; set; }
@@ -105,7 +105,7 @@ public class UserEntity {
 [Table("game_mode")]
 public class ModeEntity {
     [Key]
-    public required int Id { get; set; }
+    public int Id { get; set; }
     public required string Name { get; set; }
     public required string Description { get; set; }
 }
