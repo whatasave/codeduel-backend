@@ -8,9 +8,9 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
     public DbSet<User.Entity> Users { get; set; }
     public DbSet<Auth.Entity> Authentications { get; set; }
     public DbSet<Auth.RefreshTokenEntity> RefreshTokens { get; set; }
-    public DbSet<Game.Entity> Lobbies { get; set; }
-    public DbSet<Game.UserEntity> LobbiesUsers { get; set; }
-    public DbSet<Game.ModeEntity> LobbiesModes { get; set; }
+    public DbSet<Game.Entity> Games { get; set; }
+    public DbSet<Game.UserEntity> GameUsers { get; set; }
+    public DbSet<Game.ModeEntity> GameModes { get; set; }
     public DbSet<Challenge.Entity> Challenges { get; set; }
     public DbSet<Permissions.Entity> Permissions { get; set; }
 

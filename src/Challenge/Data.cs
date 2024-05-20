@@ -6,4 +6,6 @@ public record Challenge(
     string Title,
     string Description,
     string Content
-);
+) {
+    public Challenge(Entity entity) : this(entity.Id, new(entity.Owner), entity.Title, entity.Description, entity.Content) { }
+}

@@ -30,17 +30,22 @@ public class Entity {
     [Key]
     public int Id { get; set; }
     public required string UniqueId { get; set; }
-    public required Challenge.Entity Challenge { get; set; }
-    public int OwnerId { get; set; }
+    [ForeignKey("Challenge")]
+    public required int ChallengeId { get; set; }
+    [ForeignKey("Owner")]
+    public required int OwnerId { get; set; }
     public bool Ended { get; set; }
-    public required string Mode { get; set; }
+    public required int ModeId { get; set; }
     public required int MaxPlayers { get; set; }
     public required int GameDuration { get; set; }
-    public required string AllowedLanguages { get; set; }
+    public required string[] AllowedLanguages { get; set; }
     [DefaultValue("CURRENT_TIMESTAMP")]
     public DateTime CreatedAt { get; init; } = DateTime.Now;
     [DefaultValue("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")]
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+    public virtual Challenge.Entity? Challenge { get; set; }
+    public virtual User.Entity? Owner { get; set; }
 }
 
 // CREATE TABLE IF NOT EXISTS lobby_user (
@@ -69,10 +74,12 @@ public class Entity {
 public class UserEntity {
     [Key]
     public int Id { get; set; }
+    [ForeignKey("Lobby")]
     public required int LobbyId { get; set; }
-    public required User.Entity User { get; set; }
-    public required string Code { get; set; }
-    public required string Language { get; set; }
+    [ForeignKey("User")]
+    public required int UserId { get; set; }
+    public string? Code { get; set; }
+    public string? Language { get; set; }
     public int TestsPassed { get; set; }
     public bool ShowCode { get; set; }
     public int? MatchRank { get; set; }
@@ -81,6 +88,9 @@ public class UserEntity {
     public DateTime CreatedAt { get; init; }
     [DefaultValue("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")]
     public DateTime UpdatedAt { get; set; }
+
+    public virtual User.Entity? User { get; set; }
+    public virtual Entity? Lobby { get; set; }
 }
 
 

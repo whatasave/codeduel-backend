@@ -5,6 +5,8 @@ public record Permissions(
     bool CanEditOwnChallenges,
     bool CanEditUserPermissions
 ) {
+    public Permissions(Entity entity) : this(entity.CanEditChallenges, entity.CanEditOwnChallenges, entity.CanEditUserPermissions) { }
+
     public static Permissions FromCompactNotation(int compactNotation) {
         Type[] constructorParams = typeof(Permissions).GetFields().Select(field => field.FieldType).ToArray();
         var constructor = typeof(Permissions).GetConstructor(constructorParams)!;
@@ -33,4 +35,5 @@ public record UserPermissions(
     Permissions Permissions
 ) {
     public UserPermissions(int compactNotation) : this(compactNotation, Permissions.FromCompactNotation(compactNotation)) { }
+    public UserPermissions(Entity entity) : this(entity.CompactNotation, new(entity)) { }
 }
