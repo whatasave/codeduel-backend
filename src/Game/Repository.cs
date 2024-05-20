@@ -49,9 +49,9 @@ public class Repository(Database.DatabaseContext database) {
         database.SaveChanges();
     }
 
-    public IEnumerable<Game> GetMatchesByUsername(string username) { // TODO: add join
+    public IEnumerable<Game> GetMatchesById(int id) { // TODO: add join
         return database.GameUsers
-            .Where(gameUser => gameUser.User!.Username == username)
+            .Where(gameUser => gameUser.User!.Id == id)
             .Select(gameUser => new Game(gameUser.Lobby!))
             .AsEnumerable();
     }
