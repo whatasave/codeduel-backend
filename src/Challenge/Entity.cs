@@ -7,7 +7,7 @@ namespace Challenge;
 [Table("challenge")]
 public class Entity {
     [Key]
-    public required int Id { get; set; }
+    public int Id { get; set; }
     public required User.Entity Owner { get; set; }
     [MaxLength(50)]
     public required string Title { get; set; }

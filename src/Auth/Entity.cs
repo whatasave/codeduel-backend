@@ -17,7 +17,7 @@ public class Entity {
 [Table("auth_refresh_token")]
 public class RefreshTokenEntity {
     [Key]
-    public required int Id { get; set; }
+    public int Id { get; set; }
     public required User.Entity User { get; set; }
     public required string RefreshToken { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
