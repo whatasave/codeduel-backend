@@ -1,9 +1,12 @@
 namespace Game;
 
 public class Repository(Database.DatabaseContext database) {
-    public Game FindByUniqueId(string uniqueId) { // TODO: add join
-        var entity = database.Games.Single(game => game.UniqueId == uniqueId);
-        return new Game(entity);
+    public GameWithUsersData FindByUniqueId(string uniqueId) {
+        var query = from game in database.Games
+                    join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
+                    where game.UniqueId == uniqueId
+                    select new { game, gameUser };
+        return new(query.First().game, query.Select(e => e.gameUser).AsEnumerable());
     }
 
     public Game CreateGame(CreateGame game) {
@@ -49,10 +52,10 @@ public class Repository(Database.DatabaseContext database) {
         database.SaveChanges();
     }
 
-    public IEnumerable<Game> GetMatchesById(int id) { // TODO: add join
-        return database.GameUsers
-            .Where(gameUser => gameUser.User!.Id == id)
-            .Select(gameUser => new Game(gameUser.Lobby!))
-            .AsEnumerable();
+    public IEnumerable<GameWithUserData> GetMatchesById(int userId) {
+        return (from game in database.Games
+                join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
+                where gameUser.UserId == userId
+                select new GameWithUserData(gameUser)).AsEnumerable();
     }
 }

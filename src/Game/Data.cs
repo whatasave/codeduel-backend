@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Game;
 
 public record Game(
@@ -13,6 +15,35 @@ public record Game(
 ) {
     public Game(Entity entity) : this(entity.Id, entity.UniqueId, new(entity.Challenge!), entity.OwnerId, entity.Ended, entity.ModeId, entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages) { }
 }
+
+public record GameWithUserData(
+    Game Game,
+    UserData UserData
+) {
+    public GameWithUserData(UserEntity userEntity) : this(new Game(userEntity.Lobby!), new UserData(userEntity)) { }
+}
+
+public record GameWithUsersData(
+    Game Game,
+    IEnumerable<UserData> UserData
+) {
+    public GameWithUsersData(Entity entity, IEnumerable<UserEntity> userEntities) : this(new Game(entity), userEntities.Select(e => new UserData(e))) { }
+}
+
+public record UserData(
+    int UserId,
+    string Username,
+    string Name,
+    string? Avatar,
+    string? Code,
+    string? Language,
+    int TestsPassed,
+    DateTime? SubmittedAt,
+    bool ShowCode
+) {
+    public UserData(UserEntity entity) : this(entity.User!.Id, entity.User!.Username, entity.User!.Name, entity.User!.Avatar, entity.Code, entity.Language, entity.TestsPassed, entity.SubmittedAt, entity.ShowCode) { }
+}
+
 public record CreateGame(
     string UniqueId,
     int ChallengeId,
