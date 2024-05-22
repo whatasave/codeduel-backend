@@ -2,6 +2,6 @@ namespace Challenge;
 
 public class Repository(Database.DatabaseContext database) {
     public Challenge FindById(int id) {
-        return new(1, new User.UserListItem(1, ""), "title", "description", "content");
+        return (from c in database.Challenges where c.Id == id select new Challenge(c)).Single();
     }
 }
