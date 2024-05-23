@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var config = Config.Config.FromEnv();
@@ -33,6 +34,18 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler(builder => {
+    builder.Run(async context => {
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>()!;
+        var exception = exceptionHandlerPathFeature.Error;
+        var errorId = Guid.NewGuid();
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        Console.WriteLine($"Error ID: {errorId}");
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync($"Internal Server Error <{errorId}>");
+    });
+});
 
 var v1 = app.MapGroup("/v1");
 
