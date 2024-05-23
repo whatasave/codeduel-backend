@@ -8,7 +8,8 @@ namespace Challenge;
 public class Entity {
     [Key]
     public int Id { get; set; }
-    public required User.Entity Owner { get; set; }
+    [ForeignKey("Owner")]
+    public required int OwnerId { get; set; }
     [MaxLength(50)]
     public required string Title { get; set; }
     public required string Description { get; set; }
@@ -17,4 +18,6 @@ public class Entity {
     public DateTime CreatedAt { get; init; } = DateTime.Now;
     [DefaultValue("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")]
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+    public virtual User.Entity? Owner { get; set; }
 }

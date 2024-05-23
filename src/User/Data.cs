@@ -18,6 +18,7 @@ public record UserListItem(
     string? Avatar = null
 ) {
     public UserListItem(Entity user) : this(user.Id, user.Username, user.Name, user.Avatar) { }
+    public UserListItem(Auth.AccessTokenPayload user) : this(user.UserId, user.Username, null, null) { }
 }
 
 public record CreateUser(

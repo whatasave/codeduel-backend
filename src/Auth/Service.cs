@@ -42,7 +42,7 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
         var username = claims.Claims.First(c => c.Type == "username").Value;
         var perms = int.Parse(claims.Claims.First(c => c.Type == "perms").Value);
         var permissions = new Permissions.UserPermissions(perms);
-        return new(userId, username, permissions);
+        return new(userId, username, permissions.CompactNotation, permissions.Permissions);
     }
 
     public string GenerateRefreshToken(User.User user) {
