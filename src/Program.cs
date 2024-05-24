@@ -13,7 +13,10 @@ var database = new Database.DatabaseContext(
 builder.Services.AddScoped(_ => database);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => {
+    options.SupportNonNullableReferenceTypes();
+    options.AddSchemaFilterInstance(new RemoveUndefinedSchemaFilter());
+});
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowAllPolicy", builder => {
