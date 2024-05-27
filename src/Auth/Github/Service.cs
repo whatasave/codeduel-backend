@@ -41,13 +41,17 @@ public class Service(Repository repository, Config.Config config, User.Service u
     public async Task<GithubAccessToken?> GetAccessToken(string code, string state) {
         var client = new HttpClient();
         var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
+        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        request.Content = new FormUrlEncodedContent(new Dictionary<string, string> {
-            { "client_id", config.Auth.Github.ClientId },
-            { "client_secret", config.Auth.Github.ClientSecret },
-            { "code", code },
-            { "state", state }
-        });
+        request.Content = new StringContent(JsonSerializer.Serialize(new {
+            client_id = config.Auth.Github.ClientId,
+            client_secret = config.Auth.Github.ClientSecret,
+            code,
+            state
+        }));
+
+        Console.WriteLine("Requesting user data from Github");
+        Console.WriteLine(request.ToString());
         using var response = await client.SendAsync(request);
         using var responseStream = await response.Content.ReadAsStreamAsync();
 
@@ -57,10 +61,17 @@ public class Service(Repository repository, Config.Config config, User.Service u
     public async Task<GithubUserData?> GetUserData(string accessToken) {
         var client = new HttpClient();
         using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
+        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        Console.WriteLine("Requesting user data from Github");
+        Console.WriteLine(request.ToString());
+
         using HttpResponseMessage response = await client.SendAsync(request);
 
         using var responseStream = await response.Content.ReadAsStreamAsync();
+        Console.WriteLine("Github user data:");
+        Console.WriteLine(await new StreamReader(responseStream).ReadToEndAsync());
         return await JsonSerializer.DeserializeAsync<GithubUserData>(responseStream);
     }
 

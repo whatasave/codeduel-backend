@@ -32,17 +32,23 @@ public record GithubUserData(
     int Following = 0,
     DateTime? CreatedAt = null,
     DateTime? UpdatedAt = null
-);
+) {
+    public bool IsEmpty => string.IsNullOrEmpty(Login);
+};
 
 public record GithubEmail(
     string Email,
     bool Verified,
     bool Primary,
     string Visibility
-);
+) {
+    public bool IsEmpty => string.IsNullOrEmpty(Email);
+};
 
 public record GithubAccessToken(
     string AccessToken,
     string TokenType,
     string Scope
-);
+) {
+    public bool IsEmpty => string.IsNullOrEmpty(AccessToken);
+};
