@@ -55,7 +55,9 @@ public class Service(Repository repository, Config.Config config, User.Service u
         using var response = await client.SendAsync(request);
         using var responseStream = await response.Content.ReadAsStreamAsync();
 
-        return await JsonSerializer.DeserializeAsync<GithubAccessToken>(responseStream);
+        return await JsonSerializer.DeserializeAsync<GithubAccessToken>(responseStream, new JsonSerializerOptions {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+        });
     }
 
     public async Task<GithubUserData?> GetUserData(string accessToken) {
@@ -72,17 +74,22 @@ public class Service(Repository repository, Config.Config config, User.Service u
         using var responseStream = await response.Content.ReadAsStreamAsync();
         Console.WriteLine("Github user data:");
         Console.WriteLine(await new StreamReader(responseStream).ReadToEndAsync());
-        return await JsonSerializer.DeserializeAsync<GithubUserData>(responseStream);
+        return await JsonSerializer.DeserializeAsync<GithubUserData>(responseStream, new JsonSerializerOptions {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+        });
     }
 
     public async Task<List<GithubEmail>?> GetUserEmails(string accessToken) {
         var client = new HttpClient();
         using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user/emails");
+        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         using HttpResponseMessage response = await client.SendAsync(request);
 
         using var responseStream = await response.Content.ReadAsStreamAsync();
-        return await JsonSerializer.DeserializeAsync<List<GithubEmail>>(responseStream);
+        return await JsonSerializer.DeserializeAsync<List<GithubEmail>>(responseStream, new JsonSerializerOptions {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+        });
     }
 
     public async Task<string?> GetUserPrimaryEmail(string accessToken) {
