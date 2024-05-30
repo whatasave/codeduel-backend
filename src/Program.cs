@@ -52,7 +52,7 @@ app.UseExceptionHandler(builder => {
 
 var v1 = app.MapGroup("/v1");
 
-v1.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+v1.MapGet("/health", () => new HealthCheck("ok"));
 
 new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
 new Game.Controller(database).SetupRoutes(v1.MapGroup("/lobby"));
@@ -62,3 +62,5 @@ new Auth.Controller(config, database).SetupRoutes(v1.MapGroup("/auth"));
 new Permissions.Controller(database).SetupRoutes(v1.MapGroup("/user/permissions"));
 
 app.Run();
+
+record HealthCheck(string Status);
