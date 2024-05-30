@@ -10,7 +10,7 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
         config,
         new Service(config, database),
         new Auth.Service(config, database)
-    ) {}
+    ) { }
 
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/", Login);
@@ -42,26 +42,26 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
 
     public async Task<IResult> Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state)) {
-            Console.Error.WriteLine("[Auth Github] Missing code or state");
+            Console.WriteLine("[Auth Github] Missing code or state");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5001");
         }
 
         var cookie = request.Cookies["oauth_state"];
         if (cookie != state) {
             _ = new StatusCodeResult(StatusCodes.Status400BadRequest);
-            Console.Error.WriteLine("[Auth Github] state mismatch");
+            Console.WriteLine("[Auth Github] state mismatch");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5002");
         }
 
         var ghAccessToken = await service.GetAccessToken(code, state);
         if (ghAccessToken == null) {
-            Console.Error.WriteLine("[Auth Github] Failed to get access token");
+            Console.WriteLine("[Auth Github] Failed to get access token");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5003");
         }
 
         var userData = await service.GetUserData(ghAccessToken.AccessToken);
         if (userData == null) {
-            Console.Error.WriteLine("[Auth Github] Failed to get user data");
+            Console.WriteLine("[Auth Github] Failed to get user data");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5004");
         }
 
@@ -71,7 +71,7 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
             if (userData.Email == null) {
                 var primaryEmail = await service.GetUserPrimaryEmail(ghAccessToken.AccessToken);
                 if (primaryEmail == null) {
-                    Console.Error.WriteLine("[Auth Github] Failed to get user emails");
+                    Console.WriteLine("[Auth Github] Failed to get user emails");
                     return Results.Redirect(config.Auth.LoginRedirect + "?error=5005");
                 }
 
