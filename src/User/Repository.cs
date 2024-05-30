@@ -1,8 +1,8 @@
 namespace User;
 
 public class Repository(Database.DatabaseContext database) {
-    public User FindById(int id) {
-        return new User(database.Users.Single(u => u.Id == id));
+    public User? FindById(int id) {
+        return (from user in database.Users where user.Id == id select new User(user)).SingleOrDefault();
     }
 
     public User? FindByUsername(string username) {
