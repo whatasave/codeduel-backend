@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Auth;
 
 public class Service(Config.Config config, Repository repository, Permissions.Service permissions) {
-    private JwtSecurityTokenHandler jwt = new();
+    private readonly JwtSecurityTokenHandler jwt = new();
 
     public Service(Config.Config config, Database.DatabaseContext database) : this(config, new Repository(database), new Permissions.Service(database)) { }
 
