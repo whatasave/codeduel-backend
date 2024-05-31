@@ -28,15 +28,13 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
             Expires = DateTimeOffset.Now.AddSeconds(60)
         }.ToString());
 
-        var githubAuthUrl = "https://github.com/login/oauth/authorize";
-        var query = new QueryBuilder() {
+        var url = "https://github.com/login/oauth/authorize" + new QueryBuilder() {
             { "client_id", config.Auth.Github.ClientId },
             { "redirect_uri", config.Auth.Github.CallbackUrl },
             { "state", state },
             { "scope", "user:email" },
             { "allow_signup", "true" }
         };
-        var url = githubAuthUrl + query;
         return Results.Redirect(url);
     }
 
