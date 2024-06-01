@@ -5,14 +5,20 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Auth;
 
-public class Service(Config.Config config, Repository repository, Permissions.Service permissions) {
-    private readonly JwtSecurityTokenHandler jwt = new();
-    // Serve una svolta per dare una svolta.
+// Serve una svolta per dare una svolta.
+public class Service {
+    private readonly Config.Config config;
+    private readonly Repository repository;
+    private readonly Permissions.Service permissions;
+    private readonly JwtSecurityTokenHandler jwt;
 
-    static Service() {
-        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+    public Service(Config.Config config, Repository repository, Permissions.Service permissions) {
+        this.config = config;
+        this.repository = repository;
+        this.permissions = permissions;
+        jwt = new();
+        jwt.InboundClaimTypeMap.Clear();
     }
-
     public Service(Config.Config config, Database.DatabaseContext database) : this(config, new Repository(database), new Permissions.Service(database)) { }
 
     public RefreshTokenPayload ValidateRefreshToken(string token) {
