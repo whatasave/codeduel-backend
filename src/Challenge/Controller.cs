@@ -27,20 +27,11 @@ public class Controller(Service service, Auth.Service authService) {
 
     public Challenge Create(HttpRequest request, CreateChallenge newChallenge) {
         // TODO add a middleware to get the user from the request
-        var accessToken = request.Cookies["access_token"];
-        if (accessToken == null) {
-            throw new Exception("Access token is required");
-        }
-
-        var user = authService.ValidateAccessToken(accessToken);
-        if (user == null) {
-            throw new Exception("Invalid access token");
-        }
+        var accessToken = request.Cookies["access_token"] ?? throw new Exception("Access token is required");
+        var user = authService.ValidateAccessToken(accessToken) ?? throw new Exception("Invalid access token");
 
         // check permissions
-        if (!user.Permissions.CanEditOwnChallenges) {
-            throw new Exception("User does not have permission to create challenges");
-        }
+        if (!user.Permissions.CanEditOwnChallenges) throw new Exception("User does not have permission to create challenges");
 
         var challenge = new Challenge(
             Id: 0,
@@ -56,29 +47,14 @@ public class Controller(Service service, Auth.Service authService) {
 
     public Challenge Update(HttpRequest request, int id, CreateChallenge challenge) {
         // TODO add a middleware to get the user from the request
-        var accessToken = request.Cookies["access_token"];
-        if (accessToken == null) {
-            throw new Exception("Access token is required");
-        }
-
-        var user = authService.ValidateAccessToken(accessToken);
-        if (user == null) {
-            throw new Exception("Invalid access token");
-        }
+        var accessToken = request.Cookies["access_token"] ?? throw new Exception("Access token is required");
+        var user = authService.ValidateAccessToken(accessToken) ?? throw new Exception("Invalid access token");
 
         // check permissions
-        if (!user.Permissions.CanEditOwnChallenges) {
-            throw new Exception("User does not have permission to edit challenges");
-        }
+        if (!user.Permissions.CanEditOwnChallenges) throw new Exception("User does not have permission to edit challenges");
 
-        var existingChallenge = service.FindById(id);
-        if (existingChallenge == null) {
-            throw new Exception("Challenge not found");
-        }
-
-        if (existingChallenge.Owner.Id != user.UserId) {
-            throw new Exception("User does not have permission to edit this challenge");
-        }
+        var existingChallenge = service.FindById(id) ?? throw new Exception("Challenge not found");
+        if (existingChallenge.Owner.Id != user.UserId) throw new Exception("User does not have permission to edit this challenge");
 
         var updatedChallenge = new Challenge(
             Id: id,
@@ -93,29 +69,14 @@ public class Controller(Service service, Auth.Service authService) {
 
     public void Delete(HttpRequest request, int id) {
         // TODO add a middleware to get the user from the request
-        var accessToken = request.Cookies["access_token"];
-        if (accessToken == null) {
-            throw new Exception("Access token is required");
-        }
-
-        var user = authService.ValidateAccessToken(accessToken);
-        if (user == null) {
-            throw new Exception("Invalid access token");
-        }
+        var accessToken = request.Cookies["access_token"] ?? throw new Exception("Access token is required");
+        var user = authService.ValidateAccessToken(accessToken) ?? throw new Exception("Invalid access token");
 
         // check permissions
-        if (!user.Permissions.CanEditOwnChallenges) {
-            throw new Exception("User does not have permission to delete challenges");
-        }
+        if (!user.Permissions.CanEditOwnChallenges) throw new Exception("User does not have permission to delete challenges");
 
-        var existingChallenge = service.FindById(id);
-        if (existingChallenge == null) {
-            throw new Exception("Challenge not found");
-        }
-
-        if (existingChallenge.Owner.Id != user.UserId) {
-            throw new Exception("User does not have permission to delete this challenge");
-        }
+        var existingChallenge = service.FindById(id) ?? throw new Exception("Challenge not found");
+        if (existingChallenge.Owner.Id != user.UserId) throw new Exception("User does not have permission to delete this challenge");
 
         service.Delete(id);
     }
