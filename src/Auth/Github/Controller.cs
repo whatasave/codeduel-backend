@@ -46,13 +46,12 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
 
         var cookie = request.Cookies["oauth_state"];
         if (cookie != state) {
-            _ = new StatusCodeResult(StatusCodes.Status400BadRequest);
             Console.WriteLine("[Auth Github] state mismatch");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5002");
         }
 
         var ghAccessToken = await service.GetAccessToken(code, state);
-        if (ghAccessToken == null) {
+        if (ghAccessToken == null || ghAccessToken.IsEmpty) {
             Console.WriteLine("[Auth Github] Failed to get access token");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5003");
         }
@@ -63,22 +62,8 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5004");
         }
 
-        var user = service.GetUserByProviderId(userData.Id);
-
-        if (user == null) {
-            if (userData.Email == null) {
-                var primaryEmail = await service.GetUserPrimaryEmail(ghAccessToken.AccessToken);
-                if (primaryEmail == null) {
-                    Console.WriteLine("[Auth Github] Failed to get user emails");
-                    return Results.Redirect(config.Auth.LoginRedirect + "?error=5005");
-                }
-
-                userData = userData with { Email = primaryEmail };
-            }
-
-            user = service.Create(userData);
-        }
-
+        var user = service.GetUserByProviderId(userData.Id) ?? service.Create(userData);
+        Console.WriteLine($"[Auth Github] User: {user.Id} {user.Username} - " + user);
         var tokens = authService.GenerateTokens(user);
 
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, tokens.RefreshToken) {
@@ -97,6 +82,14 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
             Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
         }.ToString());
 
-        return Results.Redirect(request.Cookies["return_to"] ?? config.Auth.LoginRedirect);
+        var returnTo = request.Cookies["return_to"];
+        response.Cookies.Delete("return_to");
+
+        // check if non null, if the domain is in the list of allowed domains and if it is a valid url
+        if (!string.IsNullOrEmpty(returnTo) && config.Auth.AllowedDomains.Contains(new Uri(returnTo).Host)) {
+            return Results.Redirect(returnTo, true);
+        }
+
+        return Results.Redirect(config.Auth.LoginRedirect, true);
     }
 }

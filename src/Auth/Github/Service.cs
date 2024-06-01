@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Auth.Github;
 
@@ -18,6 +20,7 @@ public class Service(Repository repository, Config.Config config, User.Service u
     }
 
     public User.User? GetUserByProviderId(int providerId) {
+        Console.WriteLine($"[Auth Github] GetUserByProviderId({providerId})");
         var authUser = repository.GetAuthByProviderAndId(PROVIDER, providerId);
         if (authUser == null) return null;
 
@@ -39,65 +42,53 @@ public class Service(Repository repository, Config.Config config, User.Service u
     }
 
     public async Task<GithubAccessToken?> GetAccessToken(string code, string state) {
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
-        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
-        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        request.Content = new StringContent(JsonSerializer.Serialize(new {
-            client_id = config.Auth.Github.ClientId,
-            client_secret = config.Auth.Github.ClientSecret,
-            code,
-            state
-        }));
+        try {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://github.com/login/oauth/access_token");
+            request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent(JsonSerializer.Serialize(new {
+                client_id = config.Auth.Github.ClientId,
+                client_secret = config.Auth.Github.ClientSecret,
+                code,
+                state
+            }), Encoding.UTF8, "application/json");
 
-        Console.WriteLine("Requesting user data from Github");
-        Console.WriteLine(request.ToString());
-        using var response = await client.SendAsync(request);
-        using var responseStream = await response.Content.ReadAsStreamAsync();
+            Console.WriteLine(request.ToString());
 
-        return await JsonSerializer.DeserializeAsync<GithubAccessToken>(responseStream, new JsonSerializerOptions {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        });
+            using var response = await client.SendAsync(request);
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+
+            return await JsonSerializer.DeserializeAsync<GithubAccessToken>(responseStream, new JsonSerializerOptions {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+            });
+        }
+        catch (Exception e) {
+            Console.WriteLine("[ERROR] " + e.Message);
+            return null;
+        }
     }
 
     public async Task<GithubUserData?> GetUserData(string accessToken) {
-        var client = new HttpClient();
-        using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
-        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        try {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
+            request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        Console.WriteLine("Requesting user data from Github");
-        Console.WriteLine(request.ToString());
+            Console.WriteLine(request.ToString());
 
-        using HttpResponseMessage response = await client.SendAsync(request);
+            using var response = await client.SendAsync(request);
+            using var responseStream = await response.Content.ReadAsStreamAsync();
 
-        using var responseStream = await response.Content.ReadAsStreamAsync();
-        Console.WriteLine("Github user data:");
-        Console.WriteLine(await new StreamReader(responseStream).ReadToEndAsync());
-        return await JsonSerializer.DeserializeAsync<GithubUserData>(responseStream, new JsonSerializerOptions {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        });
-    }
-
-    public async Task<List<GithubEmail>?> GetUserEmails(string accessToken) {
-        var client = new HttpClient();
-        using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user/emails");
-        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        using HttpResponseMessage response = await client.SendAsync(request);
-
-        using var responseStream = await response.Content.ReadAsStreamAsync();
-        return await JsonSerializer.DeserializeAsync<List<GithubEmail>>(responseStream, new JsonSerializerOptions {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        });
-    }
-
-    public async Task<string?> GetUserPrimaryEmail(string accessToken) {
-        var emails = await GetUserEmails(accessToken);
-        if (emails == null) return null;
-
-        var primaryEmail = emails.Find(static e => e.Verified && e.Primary);
-
-        return primaryEmail?.Email;
+            return await JsonSerializer.DeserializeAsync<GithubUserData>(responseStream, new JsonSerializerOptions {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+            });
+        }
+        catch (Exception e) {
+            Console.WriteLine("[ERROR] " + e.Message);
+            return null;
+        }
     }
 }

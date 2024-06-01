@@ -2,7 +2,7 @@ namespace Auth;
 
 public class Repository(Database.DatabaseContext database) {
     public Entity? GetAuthByProviderAndId(string provider, int providerId) {
-        return database.Authentications.Find(provider, providerId);
+        return database.Authentications.FirstOrDefault(a => a.Provider == provider && a.ProviderId == providerId);
     }
     public UserAuth Create(CreateAuth authUser) {
         var entry = database.Authentications.Add(new() {
