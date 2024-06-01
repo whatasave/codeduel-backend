@@ -81,6 +81,16 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
             Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
         }.ToString());
 
+        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("logged_in", "true") {
+            HttpOnly = config.Cookie.HttpOnly,
+            Domain = config.Cookie.Domain,
+            Path = config.Cookie.Path,
+            Secure = config.Cookie.Secure,
+            Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
+        }.ToString());
+
+        response.Cookies.Delete("oauth_state");
+
         var returnTo = request.Cookies["return_to"];
         response.Cookies.Delete("return_to");
 
