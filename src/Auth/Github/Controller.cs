@@ -65,6 +65,7 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
         var user = service.GetUserByProviderId(userData.Id) ?? service.Create(userData);
         var tokens = authService.GenerateTokens(user);
 
+        // Setting Cookies
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, tokens.RefreshToken) {
             HttpOnly = config.Cookie.HttpOnly,
             Domain = config.Cookie.Domain,
@@ -91,6 +92,7 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
 
         response.Cookies.Delete("oauth_state");
 
+        // Handling Redirect
         var returnTo = request.Cookies["return_to"];
         response.Cookies.Delete("return_to");
 
