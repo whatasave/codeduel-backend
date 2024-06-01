@@ -7,6 +7,7 @@ namespace Auth;
 
 public class Service(Config.Config config, Repository repository, Permissions.Service permissions) {
     private readonly JwtSecurityTokenHandler jwt = new();
+    // Serve una svolta per dare una svolta.
 
     static Service() {
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
