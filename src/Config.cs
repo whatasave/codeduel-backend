@@ -80,7 +80,8 @@ public record Auth(
     string RefreshTokenCookieName,
     string JwtIssuer,
     string Secret,
-    string LoginRedirect
+    string LoginRedirect,
+    string[] AllowedDomains
 ) {
     public static Auth FromEnv() {
         return new Auth(
@@ -90,8 +91,9 @@ public record Auth(
             Env.GetString("ACCESS_TOKEN_COOKIE_NAME", "access_token"),
             Env.GetString("REFRESH_TOKEN_COOKIE_NAME", "refresh_token"),
             Env.GetString("JWT_ISSUER", "codeduel.it"),
-            Env.GetString("JWT_SECRET", "secret"),
-            Env.GetString("LOGIN_REDIRECT", "http://localhost:5173/login")
+            Env.GetString("JWT_SECRET", "secretsecretsecretxxxxxxxxxxxxxx"),
+            Env.GetString("LOGIN_REDIRECT", "http://localhost:5173/login"),
+            Env.GetString("ALLOWED_DOMAINS", "codeduel.it,127.0.0.1,localhost").Split(",")
         );
     }
 }

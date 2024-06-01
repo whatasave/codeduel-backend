@@ -46,36 +46,34 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
     }
 
     public string GenerateRefreshToken(User.User user) {
-        return jwt.WriteToken(
-            new JwtSecurityToken(
-                claims: [
-                    new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32)
-                ],
-                expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret)),
-                    SecurityAlgorithms.HmacSha256
-                )
+        if (config.Auth.Secret.Length < 32) throw new ArgumentException("Secret key must be at least 16 characters long.");
+        return jwt.WriteToken(new JwtSecurityToken(
+            claims: [
+                new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32)
+            ],
+            expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret)),
+                SecurityAlgorithms.HmacSha256
             )
-        );
+        ));
     }
 
     public string GenerateAccessToken(User.User user) {
-        return jwt.WriteToken(
-            new JwtSecurityToken(
-                claims: [
-                    new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32),
-                    new("username", user.Username),
-                    new("perms", permissions.FindCompactByUserId(user.Id).ToString())
-                ],
-                issuer: config.Auth.JwtIssuer,
-                expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret)),
-                    SecurityAlgorithms.HmacSha256
-                )
+        if (config.Auth.Secret.Length < 32) throw new ArgumentException("Secret key must be at least 16 characters long.");
+        return jwt.WriteToken(new JwtSecurityToken(
+            claims: [
+                new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32),
+                new("username", user.Username),
+                new("perms", permissions.FindCompactByUserId(user.Id).ToString())
+            ],
+            issuer: config.Auth.JwtIssuer,
+            expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Auth.Secret)),
+                SecurityAlgorithms.HmacSha256
             )
-        );
+        ));
     }
 
     public TokenPair GenerateTokens(User.User user) {
