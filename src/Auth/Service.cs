@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
@@ -7,9 +8,14 @@ namespace Auth;
 public class Service(Config.Config config, Repository repository, Permissions.Service permissions) {
     private readonly JwtSecurityTokenHandler jwt = new();
 
+    static Service() {
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+    }
+
     public Service(Config.Config config, Database.DatabaseContext database) : this(config, new Repository(database), new Permissions.Service(database)) { }
 
     public RefreshTokenPayload ValidateRefreshToken(string token) {
+
         var claims = jwt.ValidateToken(
             token,
             new TokenValidationParameters {
@@ -21,7 +27,8 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
             },
             out SecurityToken validatedToken
         );
-        var userId = int.Parse(claims.Claims.First(c => c.Type == "sub").Value);
+
+        var userId = int.Parse(claims.Claims.First(c => c.Type.Equals("sub")).Value);
         return new(userId);
     }
 
@@ -46,7 +53,7 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
     }
 
     public string GenerateRefreshToken(User.User user) {
-        if (config.Auth.Secret.Length < 32) throw new ArgumentException("Secret key must be at least 16 characters long.");
+        if (config.Auth.Secret.Length < 32) throw new ArgumentException("Secret key must be at least 32 characters long.");
         return jwt.WriteToken(new JwtSecurityToken(
             claims: [
                 new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32)
@@ -60,10 +67,10 @@ public class Service(Config.Config config, Repository repository, Permissions.Se
     }
 
     public string GenerateAccessToken(User.User user) {
-        if (config.Auth.Secret.Length < 32) throw new ArgumentException("Secret key must be at least 16 characters long.");
+        if (config.Auth.Secret.Length < 32) throw new ArgumentException("Secret key must be at least 32 characters long.");
         return jwt.WriteToken(new JwtSecurityToken(
             claims: [
-                new("sub", user.Id.ToString(), System.Security.Claims.ClaimValueTypes.Integer32),
+                new("sub", user.Id.ToString(), ClaimValueTypes.Integer32),
                 new("username", user.Username),
                 new("perms", permissions.FindCompactByUserId(user.Id).ToString())
             ],
