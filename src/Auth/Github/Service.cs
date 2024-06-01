@@ -20,7 +20,6 @@ public class Service(Repository repository, Config.Config config, User.Service u
     }
 
     public User.User? GetUserByProviderId(int providerId) {
-        Console.WriteLine($"[Auth Github] GetUserByProviderId({providerId})");
         var authUser = repository.GetAuthByProviderAndId(PROVIDER, providerId);
         if (authUser == null) return null;
 
@@ -54,8 +53,6 @@ public class Service(Repository repository, Config.Config config, User.Service u
                 state
             }), Encoding.UTF8, "application/json");
 
-            Console.WriteLine(request.ToString());
-
             using var response = await client.SendAsync(request);
             using var responseStream = await response.Content.ReadAsStreamAsync();
 
@@ -76,8 +73,6 @@ public class Service(Repository repository, Config.Config config, User.Service u
             request.Headers.UserAgent.Add(new ProductInfoHeaderValue("codeduel.it", "1.0"));
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            Console.WriteLine(request.ToString());
 
             using var response = await client.SendAsync(request);
             using var responseStream = await response.Content.ReadAsStreamAsync();

@@ -63,7 +63,6 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
         }
 
         var user = service.GetUserByProviderId(userData.Id) ?? service.Create(userData);
-        Console.WriteLine($"[Auth Github] User: {user.Id} {user.Username} - " + user);
         var tokens = authService.GenerateTokens(user);
 
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, tokens.RefreshToken) {

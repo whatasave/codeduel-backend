@@ -2,10 +2,10 @@ namespace Permissions;
 
 public class Repository(Database.DatabaseContext database) {
     public UserPermissions FindByUserId(int userId) {
-        return (from permissions in database.Permissions where permissions.UserId == userId select new UserPermissions(permissions)).Single();
+        return database.Permissions.Where(p => p.UserId == userId).Select(p => new UserPermissions(p)).Single();
     }
 
     public int FindCompactByUserId(int userId) {
-        return (from permissions in database.Permissions where permissions.UserId == userId select permissions.CompactNotation).Single();
+        return database.Permissions.Where(p => p.UserId == userId).Select(p => p.CompactNotation).SingleOrDefault();
     }
 }
