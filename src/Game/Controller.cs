@@ -12,11 +12,9 @@ public class Controller(Service service) {
         group.MapGet("/{uniqueId}", FindById);
         group.MapPatch("/{uniqueId}/submit", Submit);
         group.MapPatch("/{uniqueId}/endgame", EndGame);
-        group.MapPatch("/{uniqueId}/sharecode", ShareCode);
         group.MapGet("/{uniqueId}/results", GameResults);
-        group.MapGet("/user/{username}", GetUserGames);
-
-
+        group.MapGet("/user/{userId}", GetUserGames);
+        group.MapPatch("/sharecode", ShareCode);
     }
 
     public IEnumerable<GameWithUsersData> GetAll() {
@@ -47,9 +45,9 @@ public class Controller(Service service) {
         return new OkResult();
     }
 
-    public ActionResult ShareCode(string uniqueId, ShareCodeRequest request) {
+    public ActionResult ShareCode(ShareCodeRequest request) {
         var userId = 1; // TODO: get userId from token
-        var success = service.ShareGameCode(uniqueId, userId, request);
+        var success = service.ShareGameCode(userId, request);
         if (!success) return new BadRequestResult();
         return new OkResult();
     }
@@ -58,8 +56,8 @@ public class Controller(Service service) {
         return service.GetGameResults(uniqueId);
     }
 
-    public IEnumerable<GameWithUsersData> GetUserGames(string username) {
-        return service.GetGamesByUsername(username);
+    public IEnumerable<GameWithUserData> GetUserGames(int userId) {
+        return service.GetGamesByUserId(userId);
     }
 
 }

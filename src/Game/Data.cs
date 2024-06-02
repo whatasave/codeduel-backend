@@ -66,5 +66,6 @@ public record UpdateSubmission(
 );
 
 public record ShareCodeRequest(
+    int LobbyId,
     bool ShowCode
 );

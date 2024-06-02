@@ -29,7 +29,10 @@ public class Repository(Database.DatabaseContext database) {
     }
 
     public void UpdateGameSubmission(UpdateSubmission submission) {
-        var user = database.GameUsers.Single(gameUser => gameUser.UserId == submission.UserId && gameUser.LobbyId == submission.LobbyId);
+        var user = database.GameUsers.Single(gameUser =>
+            gameUser.UserId == submission.UserId &&
+            gameUser.LobbyId == submission.LobbyId
+        );
         user.Code = submission.Code;
         user.Language = submission.Language;
         user.TestsPassed = submission.TestsPassed;
@@ -37,27 +40,41 @@ public class Repository(Database.DatabaseContext database) {
         database.SaveChanges();
     }
 
-    public void EndLobby(string uniqueId) {
+
+
+    public bool EndGame(string uniqueId) {
         var game = database.Games.Single(game => game.UniqueId == uniqueId);
         if (game.Ended) {
             throw new Exception("Game already ended");
         }
         game.Ended = true;
         database.SaveChanges();
+
+        return game.Ended;
     }
 
-    public void ShareCode(int userId, int lobbyId, bool showCode) {
-        var user = database.GameUsers.Single(gameUser => gameUser.UserId == userId && gameUser.LobbyId == lobbyId);
-        user.ShowCode = showCode;
+    public bool ShareCode(int userId, ShareCodeRequest request) {
+        var user = database.GameUsers.SingleOrDefault(gameUser => gameUser.UserId == userId && gameUser.LobbyId == request.LobbyId);
+        if (user == null) throw new Exception("User not found");
+        user.ShowCode = request.ShowCode;
         database.SaveChanges();
+        return user.ShowCode;
     }
 
-    public IEnumerable<GameWithUserData> GetMatchesById(int userId) {
+    public IEnumerable<GameWithUserData> GetGamesByUserId(int userId) {
         return (from game in database.Games
                 join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
                 where gameUser.UserId == userId
                 select new GameWithUserData(gameUser)).AsEnumerable();
     }
 
+    public IEnumerable<GameWithUsersData> GetAllGames() {
+        var query = from game in database.Games
+                    join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
+                    select new { game, gameUser };
+        
+        var games = query.ToList().GroupBy(e => e.game.Id).Select(g => new GameWithUsersData(g.First().game, g.Select(e => e.gameUser)));
+        return games;
+    }
 
 }
