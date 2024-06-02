@@ -58,4 +58,6 @@ public class Repository(Database.DatabaseContext database) {
                 where gameUser.UserId == userId
                 select new GameWithUserData(gameUser)).AsEnumerable();
     }
+
+
 }
