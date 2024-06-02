@@ -16,7 +16,9 @@ public class Service(Repository repository) {
     }
 
     public bool SubmitGameAction(string uniqueId, UpdateSubmission request) {
-        return repository.UpdateGameSubmission(uniqueId, request);
+        // TODO: get userId from token
+        // return repository.UpdateGameSubmission(uniqueId, request);
+        return false;
     }
 
     public bool EndGame(string uniqueId) {
