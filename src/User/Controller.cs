@@ -27,6 +27,7 @@ public class Controller(Service service) {
 
     [ServiceFilter(typeof(AuthFilter))]
     public Ok<User> GetProfile(HttpContext context) {
+        Console.WriteLine("entering /user/profile");
         var auth = context.Auth();
         var user = service.FindById(auth.UserId);
         return TypedResults.Ok(user);

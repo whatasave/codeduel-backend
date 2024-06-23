@@ -1,3 +1,4 @@
+using Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.UserSecrets;
 
@@ -21,6 +22,7 @@ public class Controller(Service service) {
         return service.GetAllGames();
     }
 
+    [ServiceFilter(typeof(InternalAuthFilter))]
     public ActionResult Create(CreateGame request) {
         var result = service.CreateGame(request);
         if (result == null) return new BadRequestResult();
@@ -31,6 +33,7 @@ public class Controller(Service service) {
         return service.GetGameResults(uniqueId);
     }
 
+    [ServiceFilter(typeof(InternalAuthFilter))]
     public ActionResult Submit(string uniqueId, UpdateSubmission request) {
         var success = service.SubmitGameAction(uniqueId, request);
         if (!success) {
@@ -39,15 +42,18 @@ public class Controller(Service service) {
         return new OkResult();
     }
 
+    [ServiceFilter(typeof(InternalAuthFilter))]
     public ActionResult EndGame(string uniqueId) {
+        Console.WriteLine("executing /game/{id}/endgame");
         var success = service.EndGame(uniqueId);
         if (!success) return new BadRequestResult();
         return new OkResult();
     }
 
-    public ActionResult ShareCode(ShareCodeRequest request) {
-        var userId = 1; // TODO: get userId from token
-        var success = service.ShareGameCode(userId, request);
+    [ServiceFilter(typeof(AuthFilter))]
+    public ActionResult ShareCode(HttpContext context, ShareCodeRequest request) {
+        var auth = context.Auth();
+        var success = service.ShareGameCode(auth.UserId, request);
         if (!success) return new BadRequestResult();
         return new OkResult();
     }

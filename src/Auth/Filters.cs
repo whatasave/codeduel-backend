@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Auth;
 
-
 public class AuthFilter(Config.Config config, Service service) : IActionFilter {
-    public AuthFilter(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) {}
+    public AuthFilter(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) { }
 
     public void OnActionExecuting(ActionExecutingContext context) {
         context.HttpContext.Request.Cookies.TryGetValue(config.Auth.AccessTokenCookieName, out var accessToken);
@@ -18,11 +17,11 @@ public class AuthFilter(Config.Config config, Service service) : IActionFilter {
         context.HttpContext.Items["auth"] = payload;
     }
 
-    public void OnActionExecuted(ActionExecutedContext context) {}
+    public void OnActionExecuted(ActionExecutedContext context) { }
 }
 
 public class OptionalAuthFilter(Config.Config config, Service service) : IActionFilter {
-    public OptionalAuthFilter(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) {}
+    public OptionalAuthFilter(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) { }
 
     public void OnActionExecuting(ActionExecutingContext context) {
         context.HttpContext.Request.Cookies.TryGetValue(config.Auth.AccessTokenCookieName, out var accessToken);
@@ -32,7 +31,21 @@ public class OptionalAuthFilter(Config.Config config, Service service) : IAction
         context.HttpContext.Items["auth"] = payload;
     }
 
-    public void OnActionExecuted(ActionExecutedContext context) {}
+    public void OnActionExecuted(ActionExecutedContext context) { }
+}
+
+public class InternalAuthFilter(Config.Config config) : IActionFilter {
+    public InternalAuthFilter(Config.Config config, Database.DatabaseContext database) : this(config) { }
+
+    public void OnActionExecuting(ActionExecutingContext context) {
+        context.HttpContext.Request.Headers.TryGetValue(config.Auth.ServiceHeaderName, out var serviceToken);
+        Console.WriteLine("--- service token: " + serviceToken);
+        if (serviceToken == config.Auth.ServiceToken) return;
+
+        context.Result = new UnauthorizedResult();
+    }
+
+    public void OnActionExecuted(ActionExecutedContext context) { }
 }
 
 public static class Extensions {
