@@ -28,8 +28,7 @@ public class Controller(Config.Config config, Service service, User.Service user
         RefreshTokenPayload jwt;
         try {
             jwt = service.ValidateRefreshToken(refreshToken);
-        }
-        catch (Exception) {
+        } catch (Exception) {
             response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("logged_in", "false") {
                 HttpOnly = false,
                 Domain = config.Cookie.Domain,
@@ -41,9 +40,7 @@ public class Controller(Config.Config config, Service service, User.Service user
         }
 
         var user = userService.FindById(jwt.UserId);
-        if (user == null) {
-            return Results.Unauthorized();
-        }
+        if (user == null) return Results.Unauthorized();
 
         var accessToken = service.GenerateAccessToken(user);
 

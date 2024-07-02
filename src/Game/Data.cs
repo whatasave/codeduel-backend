@@ -64,3 +64,8 @@ public record UpdateSubmission(
     int TestsPassed,
     DateTime SubmittedAt
 );
+
+public record ShareCodeRequest(
+    int LobbyId,
+    bool ShowCode
+);
