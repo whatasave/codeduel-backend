@@ -15,11 +15,10 @@ public record User(
 public record UserListItem(
     int Id,
     string Username,
-    string? Name = null,
+    string Name,
     string? Avatar = null
 ) {
     public UserListItem(Entity user) : this(user.Id, user.Username, user.Name, user.Avatar) { }
-    public UserListItem(Auth.AccessTokenPayload user) : this(user.UserId, user.Username, null, null) { }
 }
 
 public record CreateUser(
