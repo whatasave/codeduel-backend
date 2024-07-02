@@ -13,6 +13,7 @@ var database = new Database.DatabaseContext(
 builder.Services.AddScoped(_ => database);
 builder.Services.AddScoped(provider => new Auth.AuthFilter(config, database));
 builder.Services.AddScoped(provider => new Auth.OptionalAuthFilter(config, database));
+builder.Services.AddScoped(provider => new Auth.InternalAuthFilter(config));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => {

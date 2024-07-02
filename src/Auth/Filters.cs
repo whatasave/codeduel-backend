@@ -35,14 +35,12 @@ public class OptionalAuthFilter(Config.Config config, Service service) : IAction
 }
 
 public class InternalAuthFilter(Config.Config config) : IActionFilter {
-    public InternalAuthFilter(Config.Config config, Database.DatabaseContext database) : this(config) { }
-
     public void OnActionExecuting(ActionExecutingContext context) {
         context.HttpContext.Request.Headers.TryGetValue(config.Auth.ServiceHeaderName, out var serviceToken);
-        Console.WriteLine("--- service token: " + serviceToken);
-        if (serviceToken == config.Auth.ServiceToken) return;
-
-        context.Result = new UnauthorizedResult();
+        if (serviceToken.All(token => token != config.Auth.ServiceToken)) {
+            context.Result = new UnauthorizedResult();
+            return;
+        }
     }
 
     public void OnActionExecuted(ActionExecutedContext context) { }
