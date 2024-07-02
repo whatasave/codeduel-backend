@@ -1,4 +1,5 @@
 using Auth;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Game;
@@ -22,10 +23,9 @@ public class Controller(Service service) {
     }
 
     [ServiceFilter(typeof(InternalAuthFilter))]
-    public ActionResult Create(CreateGame request) {
+    public Created<Game> Create(CreateGame request) {
         var result = service.CreateGame(request);
-        if (result == null) return new BadRequestResult();
-        return new CreatedAtActionResult("FindById", "Controller", new { uniqueId = result.UniqueId }, result);
+        return TypedResults.Created((Uri?)null, result);
     }
 
     public GameWithUsersData FindById(string uniqueId) {
@@ -33,27 +33,22 @@ public class Controller(Service service) {
     }
 
     [ServiceFilter(typeof(InternalAuthFilter))]
-    public ActionResult Submit(string uniqueId, UpdateSubmission request) {
-        var success = service.SubmitGameAction(uniqueId, request);
-        if (!success) {
-            return new BadRequestResult();
-        }
-        return new OkResult();
+    public NoContent Submit(string uniqueId, UpdateSubmission request) {
+        service.UpdateSubmission(uniqueId, request);
+        return TypedResults.NoContent();
     }
 
     [ServiceFilter(typeof(InternalAuthFilter))]
-    public ActionResult EndGame(string uniqueId) {
-        var success = service.EndGame(uniqueId);
-        if (!success) return new BadRequestResult();
-        return new OkResult();
+    public NoContent EndGame(string uniqueId) {
+        service.EndGame(uniqueId);
+        return TypedResults.NoContent();
     }
 
     [ServiceFilter(typeof(AuthFilter))]
-    public ActionResult ShareCode(HttpContext context, ShareCodeRequest request) {
+    public NoContent ShareCode(HttpContext context, ShareCodeRequest request) {
         var auth = context.Auth();
-        var success = service.ShareGameCode(auth.UserId, request);
-        if (!success) return new BadRequestResult();
-        return new OkResult();
+        service.ShareGameCode(auth.UserId, request);
+        return TypedResults.NoContent();
     }
 
     public GameWithUsersData GameResults(string uniqueId) {

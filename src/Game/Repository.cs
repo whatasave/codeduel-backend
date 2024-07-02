@@ -40,17 +40,13 @@ public class Repository(Database.DatabaseContext database) {
         database.SaveChanges();
     }
 
-
-
-    public bool EndGame(string uniqueId) {
+    public void EndGame(string uniqueId) {
         var game = database.Games.Single(game => game.UniqueId == uniqueId);
         if (game.Ended) {
             throw new Exception("Game already ended");
         }
         game.Ended = true;
         database.SaveChanges();
-
-        return game.Ended;
     }
 
     public bool ShareCode(int userId, ShareCodeRequest request) {
@@ -72,7 +68,7 @@ public class Repository(Database.DatabaseContext database) {
         var query = from game in database.Games
                     join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
                     select new { game, gameUser };
-        
+
         var games = query.ToList().GroupBy(e => e.game.Id).Select(g => new GameWithUsersData(g.First().game, g.Select(e => e.gameUser)));
         return games;
     }

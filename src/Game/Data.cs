@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace Game;
 
 public record Game(

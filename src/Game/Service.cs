@@ -1,7 +1,7 @@
 namespace Game;
 
 public class Service(Repository repository) {
-    public Service(Database.DatabaseContext database) : this(new Repository(database)) {}
+    public Service(Database.DatabaseContext database) : this(new Repository(database)) { }
 
     public GameWithUsersData GetGameResults(string uniqueId) {
         return repository.FindByUniqueId(uniqueId);
@@ -15,22 +15,20 @@ public class Service(Repository repository) {
         return repository.CreateGame(request);
     }
 
-    public bool SubmitGameAction(string uniqueId, UpdateSubmission request) {
+    public void UpdateSubmission(string uniqueId, UpdateSubmission request) {
         // TODO: get userId from token
         // return repository.UpdateGameSubmission(uniqueId, request);
-        return false;
     }
 
-    public bool EndGame(string uniqueId) {
-        return repository.EndGame(uniqueId);
+    public void EndGame(string uniqueId) {
+        repository.EndGame(uniqueId);
     }
 
-    public bool ShareGameCode(int userId, ShareCodeRequest request) {
-        return repository.ShareCode(userId, request);
+    public void ShareGameCode(int userId, ShareCodeRequest request) {
+        repository.ShareCode(userId, request);
     }
 
     public IEnumerable<GameWithUserData> GetGamesByUserId(int userId) {
         return repository.GetGamesByUserId(userId);
     }
-
 }
