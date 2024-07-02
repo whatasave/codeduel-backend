@@ -7,7 +7,7 @@ public class Controller(Service service) {
         group.MapGet("/{id}", FindById);
     }
 
-    public GameWithUsersData FindById(string uniqueId) {
-        return service.FindByUniqueId(uniqueId);
+    public GameWithUsersData FindById(string id) {
+        return service.FindByUniqueId(id);
     }
 }
