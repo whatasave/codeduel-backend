@@ -16,9 +16,10 @@ public record UserListItem(
     int Id,
     string Username,
     string Name,
+    DateTime CreatedAt,
     string? Avatar = null
 ) {
-    public UserListItem(Entity user) : this(user.Id, user.Username, user.Name, user.Avatar) { }
+    public UserListItem(Entity user) : this(user.Id, user.Username, user.Name, user.CreatedAt, user.Avatar) { }
 }
 
 public record CreateUser(
