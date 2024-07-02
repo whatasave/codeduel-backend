@@ -11,6 +11,7 @@ public class Controller(Service service) {
         group.MapGet("/{id}", FindById);
         group.MapGet("/", FindByUsername);
         group.MapGet("/profile", GetProfile);
+        group.MapGet("/list", FindAll);
     }
 
     public Results<Ok<User>, NotFound> FindById(int id) {
@@ -31,5 +32,9 @@ public class Controller(Service service) {
         var auth = context.Auth();
         var user = service.FindById(auth.UserId);
         return TypedResults.Ok(user);
+    }
+
+    public IEnumerable<UserListItem> FindAll() {
+        return service.FindAll();
     }
 }

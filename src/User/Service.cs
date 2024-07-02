@@ -12,6 +12,10 @@ public class Service(Repository repository) {
         return repository.FindById(id);
     }
 
+    public IEnumerable<UserListItem> FindAll() {
+        return repository.FindAll();
+    }
+
     public User Create(CreateUser user) {
         return repository.Create(user);
     }
