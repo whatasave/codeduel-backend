@@ -12,12 +12,12 @@ public class Service(Repository repository) {
         return repository.FindAll();
     }
 
-    public Challenge Create(Challenge challenge) {
-        return repository.Create(challenge);
+    public Challenge Create(CreateChallenge challenge, int ownerId) {
+        return repository.Create(challenge, ownerId);
     }
 
-    public Challenge Update(Challenge challenge) {
-        return repository.Update(challenge);
+    public Challenge Update(int id, CreateChallenge challenge, int ownerId) {
+        return repository.Update(id, challenge, ownerId);
     }
 
     public Challenge Delete(int id) {

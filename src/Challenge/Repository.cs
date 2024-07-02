@@ -11,9 +11,9 @@ public class Repository(Database.DatabaseContext database) {
         return (from c in database.Challenges select new Challenge(c)).AsEnumerable();
     }
 
-    public Challenge Create(Challenge challenge) {
+    public Challenge Create(CreateChallenge challenge, int ownerId) {
         var entity = database.Challenges.Add(new Entity {
-            OwnerId = challenge.Owner.Id,
+            OwnerId = ownerId,
             Title = challenge.Title,
             Description = challenge.Description,
             Content = challenge.Content
@@ -22,10 +22,10 @@ public class Repository(Database.DatabaseContext database) {
         return new Challenge(entity.Entity);
     }
 
-    public Challenge Update(Challenge challenge) {
+    public Challenge Update(int id, CreateChallenge challenge, int ownerId) {
         var entity = database.Challenges.Update(new Entity {
-            Id = challenge.Id,
-            OwnerId = challenge.Owner.Id,
+            Id = id,
+            OwnerId = ownerId,
             Title = challenge.Title,
             Description = challenge.Description,
             Content = challenge.Content

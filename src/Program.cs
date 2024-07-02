@@ -60,7 +60,7 @@ v1.MapGet("/health", () => new HealthCheck("ok"));
 
 new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
 new Game.Controller(database).SetupRoutes(v1.MapGroup("/game"));
-new Challenge.Controller(config, database).SetupRoutes(v1.MapGroup("/challenge"));
+new Challenge.Controller(database).SetupRoutes(v1.MapGroup("/challenge"));
 new Auth.Github.Controller(config, database).SetupRoutes(v1.MapGroup("/auth/github"));
 new Auth.Controller(config, database).SetupRoutes(v1.MapGroup("/auth"));
 new Permissions.Controller(database).SetupRoutes(v1.MapGroup("/user/permissions"));
