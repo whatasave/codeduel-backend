@@ -19,7 +19,6 @@ public class Service {
         jwt = new();
         jwt.InboundClaimTypeMap.Clear();
     }
-    public Service(Config.Config config, Database.DatabaseContext database) : this(config, new Repository(database), new Permissions.Service(database)) { }
 
     public RefreshTokenPayload ValidateRefreshToken(string token) {
 

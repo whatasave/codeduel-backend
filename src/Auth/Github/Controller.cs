@@ -5,13 +5,6 @@ using Microsoft.Net.Http.Headers;
 namespace Auth.Github;
 
 public class Controller(Config.Config config, Service service, Auth.Service authService) {
-
-    public Controller(Config.Config config, Database.DatabaseContext database) : this(
-        config,
-        new Service(config, database),
-        new Auth.Service(config, database)
-    ) { }
-
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/", Login);
         group.MapGet("/callback", Callback);

@@ -1,19 +1,11 @@
-using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace Auth.Github;
 
 public class Service(Repository repository, Config.Config config, User.Service userService) {
     public const string PROVIDER = "github";
-
-    public Service(Config.Config config, Database.DatabaseContext database) : this(
-        new Repository(database),
-        config,
-        new User.Service(database)
-    ) { }
 
     public Entity? FindById(int providerId) {
         return repository.GetAuthByProviderAndId(PROVIDER, providerId);

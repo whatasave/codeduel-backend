@@ -9,11 +9,10 @@ var database = new Database.DatabaseContext(
         .UseMySql(connString, ServerVersion.AutoDetect(connString))
         .Options
 );
+var controller = new Controller(config, database);
 
 builder.Services.AddScoped(_ => database);
-builder.Services.AddScoped(provider => new Auth.AuthFilter(config, database));
-builder.Services.AddScoped(provider => new Auth.OptionalAuthFilter(config, database));
-builder.Services.AddScoped(provider => new Auth.InternalAuthFilter(config));
+builder.Services.AddScoped(_ => config);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => {
@@ -23,7 +22,7 @@ builder.Services.AddSwaggerGen(options => {
 });
 
 builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAllPolicy", builder => {
+    options.AddDefaultPolicy(builder => {
         builder
             .WithOrigins(config.Cors.Origins)
             .WithMethods(config.Cors.Methods)
@@ -54,16 +53,13 @@ app.UseExceptionHandler(builder => {
     });
 });
 
+app.UseCors();
+
 var v1 = app.MapGroup("/v1");
 
 v1.MapGet("/health", () => new HealthCheck("ok"));
 
-new User.Controller(database).SetupRoutes(v1.MapGroup("/user"));
-new Game.Controller(database).SetupRoutes(v1.MapGroup("/game"));
-new Challenge.Controller(database).SetupRoutes(v1.MapGroup("/challenge"));
-new Auth.Github.Controller(config, database).SetupRoutes(v1.MapGroup("/auth/github"));
-new Auth.Controller(config, database).SetupRoutes(v1.MapGroup("/auth"));
-new Permissions.Controller(database).SetupRoutes(v1.MapGroup("/user/permissions"));
+controller.SetupRoutes(v1);
 
 app.Run();
 

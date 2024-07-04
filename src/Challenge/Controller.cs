@@ -5,10 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace Challenge;
 
 public class Controller(Service service) {
-    public Controller(Database.DatabaseContext database) : this(
-        new Service(database)
-    ) { }
-
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/", FindAll);
         group.MapGet("/{id}", FindById);

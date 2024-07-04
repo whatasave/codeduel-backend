@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using dotenv.net;
 
 namespace Config;
@@ -35,25 +36,29 @@ public record Database(
             Env.GetString("DB_PASS", "codeduel")
         );
     }
+
     public string ConnectionString() {
         return $"server={Host};port={Port};database={DatabaseName};user={User};password={Password}";
     }
 }
 
-public record Cors(
-    string Origins,
-    string Methods,
-    string Headers,
+public partial record Cors(
+    string[] Origins,
+    string[] Methods,
+    string[] Headers,
     bool AllowCredentials
 ) {
     public static Cors FromEnv() {
         return new Cors(
-            Env.GetString("CORS_ORIGIN", "http://localhost:5173"),
-            Env.GetString("CORS_METHODS", "GET, POST, PUT, DELETE, PATCH, OPTIONS"),
-            Env.GetString("CORS_HEADERS", "Content-Type, x-token, Accept, Content-Length, Accept-Encoding, Authorization,X-CSRF-Token"),
+            ListSeparator().Split(Env.GetString("CORS_ORIGIN", "http://localhost:5173")),
+            ListSeparator().Split(Env.GetString("CORS_METHODS", "GET, POST, PUT, DELETE, PATCH, OPTIONS")),
+            ListSeparator().Split(Env.GetString("CORS_HEADERS", "Content-Type, x-token, Accept, Content-Length, Accept-Encoding, Authorization,X-CSRF-Token")),
             Env.GetBool("CORS_CREDENTIALS", true)
         );
     }
+
+    [GeneratedRegex(" *, *")]
+    private static partial Regex ListSeparator();
 }
 
 public record Cookie(
@@ -72,7 +77,7 @@ public record Cookie(
     }
 }
 
-public record Auth(
+public partial record Auth(
     Github Github,
     TimeSpan AccessTokenExpires,
     TimeSpan RefreshTokenExpires,
@@ -97,9 +102,12 @@ public record Auth(
             Env.GetString("SERVICE_HEADER_NAME", "x-token"),
             Env.GetString("SERVICE_TOKEN", "secretsecret"),
             Env.GetString("LOGIN_REDIRECT", "http://localhost:5173/login"),
-            Env.GetString("ALLOWED_DOMAINS", "codeduel.it,127.0.0.1,localhost").Split(",")
+            ListSeparator().Split(Env.GetString("ALLOWED_DOMAINS", "codeduel.it,127.0.0.1,localhost"))
         );
     }
+
+    [GeneratedRegex(" *, *")]
+    private static partial Regex ListSeparator();
 }
 
 public record Github(

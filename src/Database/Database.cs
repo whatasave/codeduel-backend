@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,9 +14,6 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
     public DbSet<Permissions.Entity> Permissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
-        //    modelBuilder.Entity<User.Entity>()
-        //        .Property(b => b.Username)
-        //        .IsRequired();
         // change all names to snake_case
         foreach (var entity in modelBuilder.Model.GetEntityTypes()) {
             entity.SetTableName(ToSnakeCase(entity.GetTableName()));
@@ -35,10 +31,6 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
             }
         }
     }
-
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-    //   optionsBuilder.UseMySQL("server=xxxxxxxx;port=3306;database=xxxxxxxx;user=xxxxxxxx;password=xxxxxxxx");
-    //}
 
     private static string? ToSnakeCase(string? text) {
         if (text == null) {

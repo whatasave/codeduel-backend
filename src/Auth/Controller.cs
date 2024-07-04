@@ -4,8 +4,6 @@ using Microsoft.Net.Http.Headers;
 namespace Auth;
 
 public class Controller(Config.Config config, Service service, User.Service userService) {
-    public Controller(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database), new User.Service(database)) { }
-
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/refresh", RefreshToken);
         group.MapGet("/logout", Logout);
@@ -28,7 +26,8 @@ public class Controller(Config.Config config, Service service, User.Service user
         RefreshTokenPayload jwt;
         try {
             jwt = service.ValidateRefreshToken(refreshToken);
-        } catch (Exception) {
+        }
+        catch (Exception) {
             response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("logged_in", "false") {
                 HttpOnly = false,
                 Domain = config.Cookie.Domain,

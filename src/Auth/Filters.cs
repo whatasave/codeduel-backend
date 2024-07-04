@@ -1,49 +1,37 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-
 namespace Auth;
 
-public class AuthFilter(Config.Config config, Service service) : IActionFilter {
-    public AuthFilter(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) { }
-
-    public void OnActionExecuting(ActionExecutingContext context) {
+public class AuthFilter(Config.Config config, Service service) : IEndpointFilter {
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next) {
         context.HttpContext.Request.Cookies.TryGetValue(config.Auth.AccessTokenCookieName, out var accessToken);
         if (accessToken == null) {
-            context.Result = new UnauthorizedResult();
-            return;
+            return Results.Unauthorized();
         }
 
         var payload = service.ValidateAccessToken(accessToken);
         context.HttpContext.Items["auth"] = payload;
+        return await next(context);
     }
-
-    public void OnActionExecuted(ActionExecutedContext context) { }
 }
 
-public class OptionalAuthFilter(Config.Config config, Service service) : IActionFilter {
-    public OptionalAuthFilter(Config.Config config, Database.DatabaseContext database) : this(config, new Service(config, database)) { }
-
-    public void OnActionExecuting(ActionExecutingContext context) {
+public class OptionalAuthFilter(Config.Config config, Service service) : IEndpointFilter {
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next) {
         context.HttpContext.Request.Cookies.TryGetValue(config.Auth.AccessTokenCookieName, out var accessToken);
-        if (accessToken == null) return;
-
-        var payload = service.ValidateAccessToken(accessToken);
-        context.HttpContext.Items["auth"] = payload;
+        if (accessToken != null) {
+            var payload = service.ValidateAccessToken(accessToken);
+            context.HttpContext.Items["auth"] = payload;
+        }
+        return await next(context);
     }
-
-    public void OnActionExecuted(ActionExecutedContext context) { }
 }
 
-public class InternalAuthFilter(Config.Config config) : IActionFilter {
-    public void OnActionExecuting(ActionExecutingContext context) {
+public class InternalAuthFilter(Config.Config config) : IEndpointFilter {
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next) {
         context.HttpContext.Request.Headers.TryGetValue(config.Auth.ServiceHeaderName, out var serviceToken);
         if (serviceToken.All(token => token != config.Auth.ServiceToken)) {
-            context.Result = new UnauthorizedResult();
-            return;
+            return Results.Unauthorized();
         }
+        return await next(context);
     }
-
-    public void OnActionExecuted(ActionExecutedContext context) { }
 }
 
 public static class Extensions {
