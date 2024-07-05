@@ -12,7 +12,7 @@ var database = new Database.DatabaseContext(
 var controller = new Controller(config, database);
 
 builder.Services.AddScoped(_ => database);
-builder.Services.AddScoped(_ => config);
+builder.Services.AddTransient(_ => config);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => {
@@ -60,6 +60,7 @@ var v1 = app.MapGroup("/v1");
 v1.MapGet("/health", () => new HealthCheck("ok"));
 
 controller.SetupRoutes(v1);
+controller.SetupMiddleware(app);
 
 app.Run();
 

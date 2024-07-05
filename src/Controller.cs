@@ -20,8 +20,6 @@ public class Controller {
     private readonly Auth.Controller authController;
     private readonly Permissions.Controller permissionsController;
 
-    private readonly Auth.AuthFilter authFilter;
-
     public Controller(Config.Config config, Database.DatabaseContext database) {
         authRepository = new Auth.Repository(database);
         userRepository = new User.Repository(database);
@@ -36,9 +34,7 @@ public class Controller {
         githubAuthService = new Auth.Github.Service(authRepository, config, userService);
         authService = new Auth.Service(config, authRepository, permissionsService);
 
-        authFilter = new Auth.AuthFilter(config, authService);
-
-        userController = new User.Controller(userService, authFilter);
+        userController = new User.Controller(userService);
         gameController = new Game.Controller(gameService);
         challengeController = new Challenge.Controller(challengeService);
         githubAuthController = new Auth.Github.Controller(config, githubAuthService, authService);
@@ -53,5 +49,13 @@ public class Controller {
         githubAuthController.SetupRoutes(group.MapGroup("/auth/github"));
         authController.SetupRoutes(group.MapGroup("/auth"));
         permissionsController.SetupRoutes(group.MapGroup("/user/permissions"));
+    }
+
+    public void SetupMiddleware(WebApplication app) {
+        var config = app.Services.GetRequiredService<Config.Config>();
+        var authMiddleware = new Auth.Middleware(config, authService);
+        app.Use(authMiddleware.Auth);
+        app.Use(authMiddleware.OptionalAuth);
+        app.Use(authMiddleware.InternalAuth);
     }
 }

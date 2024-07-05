@@ -1,5 +1,4 @@
 using Auth;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -30,7 +29,7 @@ public class RemoveUndefinedSchemaFilter : ISchemaFilter {
 public class AuthOperationFilter : IOperationFilter {
     public void Apply(OpenApiOperation operation, OperationFilterContext context) {
         var hasAuthFilter = context.MethodInfo.GetCustomAttributes(inherit: true)
-            .Any(a => a.GetType() == typeof(ServiceFilterAttribute) && ((ServiceFilterAttribute)a).ServiceType == typeof(AuthFilter));
+            .Any(a => a.GetType() == typeof(AuthAttribute) || a.GetType() == typeof(OptionalAuthAttribute) || a.GetType() == typeof(InternalAuthAttribute));
 
         if (hasAuthFilter) {
             operation.Responses.Add("401", new OpenApiResponse {

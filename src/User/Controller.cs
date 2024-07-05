@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace User;
-public class Controller(Service service, AuthFilter authFilter) {
+public class Controller(Service service) {
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/{id}", FindById);
         group.MapGet("/", FindByUsername);
-        group.MapGet("/profile", GetProfile).AddEndpointFilter(authFilter);
+        group.MapGet("/profile", GetProfile);
         group.MapGet("/list", FindAll);
     }
 
@@ -23,6 +23,7 @@ public class Controller(Service service, AuthFilter authFilter) {
         return TypedResults.Ok(user);
     }
 
+    [Auth]
     public User GetProfile(HttpContext context) {
         Console.WriteLine("GetProfile");
         var auth = context.Auth();

@@ -1,6 +1,5 @@
 using Auth;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Game;
 public class Controller(Service service) {
@@ -19,7 +18,7 @@ public class Controller(Service service) {
         return service.GetAllGames();
     }
 
-    [ServiceFilter(typeof(InternalAuthFilter))]
+    [InternalAuth]
     public Created<Game> Create(CreateGame request) {
         var result = service.CreateGame(request);
         return TypedResults.Created((Uri?)null, result);
@@ -29,19 +28,19 @@ public class Controller(Service service) {
         return service.GetGameResults(uniqueId);
     }
 
-    [ServiceFilter(typeof(InternalAuthFilter))]
+    [InternalAuth]
     public NoContent Submit(string uniqueId, UpdateSubmission request) {
         service.UpdateSubmission(uniqueId, request);
         return TypedResults.NoContent();
     }
 
-    [ServiceFilter(typeof(InternalAuthFilter))]
+    [InternalAuth]
     public NoContent EndGame(string uniqueId) {
         service.EndGame(uniqueId);
         return TypedResults.NoContent();
     }
 
-    [ServiceFilter(typeof(AuthFilter))]
+    [Auth]
     public NoContent ShareCode(HttpContext context, ShareCodeRequest request) {
         var auth = context.Auth();
         service.ShareGameCode(auth.UserId, request);
