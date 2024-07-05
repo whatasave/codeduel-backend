@@ -25,7 +25,6 @@ public class Controller(Service service) {
 
     [Auth]
     public User GetProfile(HttpContext context) {
-        Console.WriteLine("GetProfile");
         var auth = context.Auth();
         var user = service.FindById(auth.UserId)!;
         return user;
