@@ -7,7 +7,8 @@ public record Config(
     Database Database,
     Cors Cors,
     Cookie Cookie,
-    Auth Auth
+    Auth Auth,
+    string FrontendUrl
 ) {
     public static Config FromEnv() {
         DotEnv.Load();
@@ -15,7 +16,8 @@ public record Config(
             Database.FromEnv(),
             Cors.FromEnv(),
             Cookie.FromEnv(),
-            Auth.FromEnv()
+            Auth.FromEnv(),
+            Env.GetString("FRONTEND_URL", "http://localhost:5173")
         );
     }
 }
@@ -101,7 +103,7 @@ public partial record Auth(
             Env.GetString("JWT_SECRET", "secretsecretsecretxxxxxxxxxxxxxx"),
             Env.GetString("SERVICE_HEADER_NAME", "x-token"),
             Env.GetString("SERVICE_TOKEN", "secretsecret"),
-            Env.GetString("LOGIN_REDIRECT", "http://localhost:5173/login"),
+            Env.GetString("LOGIN_REDIRECT", "/"),
             ListSeparator().Split(Env.GetString("ALLOWED_DOMAINS", "codeduel.it,127.0.0.1,localhost"))
         );
     }
@@ -119,7 +121,7 @@ public record Github(
         return new Github(
             Env.GetString("AUTH_GITHUB_CLIENT_ID", ""),
             Env.GetString("AUTH_GITHUB_CLIENT_SECRET", ""),
-            Env.GetString("AUTH_GITHUB_CLIENT_CALLBACK_URL", "http://127.0.0.1:5000/v1/auth/github/callback")
+            Env.GetString("AUTH_GITHUB_CLIENT_CALLBACK_URL", "https://127.0.0.1:5000/v1/auth/github/callback")
         );
     }
 }

@@ -18,8 +18,11 @@ public class Entity {
 public class RefreshTokenEntity {
     [Key]
     public int Id { get; set; }
-    public required User.Entity User { get; set; }
+    [ForeignKey("User")]
+    public required int UserId { get; set; }
     public required string RefreshToken { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
+
+    public virtual User.Entity? User { get; set; }
 }

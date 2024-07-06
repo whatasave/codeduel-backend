@@ -88,12 +88,11 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
         // Handling Redirect
         var returnTo = request.Cookies["return_to"];
         response.Cookies.Delete("return_to");
+        var origin = request.Headers.Origin.FirstOrDefault(config.FrontendUrl);
 
-        // check if non null, if the domain is in the list of allowed domains and if it is a valid url
-        if (!string.IsNullOrEmpty(returnTo) && config.Auth.AllowedDomains.Contains(new Uri(returnTo).Host)) {
-            return Results.Redirect(returnTo, true);
+        if (!string.IsNullOrEmpty(returnTo)) {
+            return Results.Redirect(origin + returnTo, true);
         }
-
-        return Results.Redirect(config.Auth.LoginRedirect, true);
+        return Results.Redirect(origin + config.Auth.LoginRedirect, true);
     }
 }

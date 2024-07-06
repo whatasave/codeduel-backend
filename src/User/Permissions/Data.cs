@@ -9,16 +9,15 @@ public record Permissions(
         entity.CanEditChallenges,
         entity.CanEditOwnChallenges,
         entity.CanEditUserPermissions
-    ) {}
+    ) { }
 
     public static Permissions FromCompactNotation(int compactNotation) {
-        Type[] constructorParams = typeof(Permissions).GetFields().Select(field => field.FieldType).ToArray();
-        var constructor = typeof(Permissions).GetConstructor(constructorParams)!;
+        var constructor = typeof(Permissions).GetConstructors().First();
         return (Permissions)constructor.Invoke(
             typeof(Permissions)
                 .GetFields()
                 .Select((field, i) => (field, i))
-                .Aggregate(new object[constructorParams.Length], (acc, fieldAndIndex) => {
+                .Aggregate(new object[constructor.GetParameters().Length], (acc, fieldAndIndex) => {
                     var (field, i) = fieldAndIndex;
                     acc[i] = (compactNotation & 1) == 1;
                     compactNotation >>= 1;

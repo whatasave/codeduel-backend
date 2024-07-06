@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Auth.Github;
 
 public record GithubUserData(
