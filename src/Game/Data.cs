@@ -8,7 +8,7 @@ public record Game(
     bool Ended,
     Mode Mode,
     int MaxPlayers,
-    int GameDuration,
+    int Duration,
     string[] AllowedLanguages,
     DateTime CreatedAt
 ) {
