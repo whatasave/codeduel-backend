@@ -60,13 +60,7 @@ public class Controller(Config.Config config, Service service, User.Service user
 
     public IResult Logout(HttpRequest request, HttpResponse response) {
         foreach (var cookie in new string[] { config.Auth.RefreshTokenCookieName, config.Auth.AccessTokenCookieName, "logged_in", "oauth_state" }) {
-            response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(cookie, "") {
-                HttpOnly = config.Cookie.HttpOnly,
-                Domain = config.Cookie.Domain,
-                Path = config.Cookie.Path,
-                Secure = config.Cookie.Secure,
-                Expires = DateTimeOffset.UnixEpoch
-            }.ToString());
+            response.Cookies.Delete(cookie);
         }
 
         return Results.NoContent();

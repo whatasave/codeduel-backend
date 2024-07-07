@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
 namespace Auth.Github;
@@ -59,29 +60,29 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
         var tokens = authService.GenerateTokens(user);
 
         // Setting Cookies
-        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, tokens.RefreshToken) {
-            HttpOnly = config.Cookie.HttpOnly,
-            Domain = config.Cookie.Domain,
-            Path = config.Cookie.Path,
-            Secure = config.Cookie.Secure,
-            Expires = DateTimeOffset.Now.Add(config.Auth.RefreshTokenExpires)
-        }.ToString());
-
-        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.AccessTokenCookieName, tokens.AccessToken) {
-            HttpOnly = config.Cookie.HttpOnly,
-            Domain = config.Cookie.Domain,
-            Path = config.Cookie.Path,
-            Secure = config.Cookie.Secure,
-            Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
-        }.ToString());
-
-        response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("logged_in", "true") {
-            HttpOnly = config.Cookie.HttpOnly,
-            Domain = config.Cookie.Domain,
-            Path = config.Cookie.Path,
-            Secure = config.Cookie.Secure,
-            Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
-        }.ToString());
+        response.Headers.Append(HeaderNames.SetCookie, new StringValues([
+            new SetCookieHeaderValue(config.Auth.RefreshTokenCookieName, tokens.RefreshToken) {
+                HttpOnly = config.Cookie.HttpOnly,
+                Domain = config.Cookie.Domain,
+                Path = config.Cookie.Path,
+                Secure = config.Cookie.Secure,
+                Expires = DateTimeOffset.Now.Add(config.Auth.RefreshTokenExpires)
+            }.ToString(),
+            HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.AccessTokenCookieName, tokens.AccessToken) {
+                HttpOnly = config.Cookie.HttpOnly,
+                Domain = config.Cookie.Domain,
+                Path = config.Cookie.Path,
+                Secure = config.Cookie.Secure,
+                Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
+            }.ToString(),
+            HeaderNames.SetCookie, new SetCookieHeaderValue("logged_in", "true") {
+                HttpOnly = config.Cookie.HttpOnly,
+                Domain = config.Cookie.Domain,
+                Path = config.Cookie.Path,
+                Secure = config.Cookie.Secure,
+                Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
+            }.ToString()
+        ]));
 
         response.Cookies.Delete("oauth_state");
 
