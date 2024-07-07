@@ -9,9 +9,10 @@ public record Game(
     Mode Mode,
     int MaxPlayers,
     int GameDuration,
-    string[] AllowedLanguages
+    string[] AllowedLanguages,
+    DateTime CreatedAt
 ) {
-    public Game(Entity entity) : this(entity.Id, entity.UniqueId, new(entity.Challenge!), entity.OwnerId, entity.Ended, new Mode(entity.Mode!), entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages) { }
+    public Game(Entity entity) : this(entity.Id, entity.UniqueId, new(entity.Challenge!), entity.OwnerId, entity.Ended, new Mode(entity.Mode!), entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages, entity.CreatedAt) { }
 }
 
 public record GameWithUserData(
