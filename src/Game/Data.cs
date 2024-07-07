@@ -6,12 +6,12 @@ public record Game(
     Challenge.Challenge Challenge,
     int OwnerId,
     bool Ended,
-    int ModeId,
+    Mode Mode,
     int MaxPlayers,
     int GameDuration,
     string[] AllowedLanguages
 ) {
-    public Game(Entity entity) : this(entity.Id, entity.UniqueId, new(entity.Challenge!), entity.OwnerId, entity.Ended, entity.ModeId, entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages) { }
+    public Game(Entity entity) : this(entity.Id, entity.UniqueId, new(entity.Challenge!), entity.OwnerId, entity.Ended, new Mode(entity.Mode!), entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages) { }
 }
 
 public record GameWithUserData(
@@ -67,3 +67,11 @@ public record ShareCodeRequest(
     int LobbyId,
     bool ShowCode
 );
+
+public record Mode(
+    int Id,
+    string Name,
+    string Description
+) {
+    public Mode(ModeEntity entity) : this(entity.Id, entity.Name, entity.Description) { }
+}

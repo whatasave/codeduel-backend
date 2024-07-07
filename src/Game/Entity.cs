@@ -35,6 +35,7 @@ public class Entity {
     [ForeignKey("Owner")]
     public required int OwnerId { get; set; }
     public bool Ended { get; set; }
+    [ForeignKey("Mode")]
     public required int ModeId { get; set; }
     public required int MaxPlayers { get; set; }
     public required int GameDuration { get; set; }
@@ -46,6 +47,7 @@ public class Entity {
 
     public virtual Challenge.Entity? Challenge { get; set; }
     public virtual User.Entity? Owner { get; set; }
+    public virtual ModeEntity? Mode { get; set; }
 }
 
 // CREATE TABLE IF NOT EXISTS lobby_user (
