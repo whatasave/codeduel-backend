@@ -76,11 +76,11 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
                 Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
             }.ToString(),
             HeaderNames.SetCookie, new SetCookieHeaderValue("logged_in", "true") {
-                HttpOnly = config.Cookie.HttpOnly,
+                HttpOnly = false,
                 Domain = config.Cookie.Domain,
                 Path = config.Cookie.Path,
                 Secure = config.Cookie.Secure,
-                Expires = DateTimeOffset.Now.Add(config.Auth.AccessTokenExpires)
+                Expires = DateTimeOffset.Now.Add(config.Auth.RefreshTokenExpires)
             }.ToString()
         ]));
 

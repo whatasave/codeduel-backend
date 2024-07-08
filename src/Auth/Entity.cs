@@ -17,7 +17,6 @@ public class Entity {
 [Table("auth_refresh_token")]
 public class RefreshTokenEntity {
     [Key]
-    public int Id { get; set; }
     [ForeignKey("User")]
     public required int UserId { get; set; }
     public required string RefreshToken { get; set; }
