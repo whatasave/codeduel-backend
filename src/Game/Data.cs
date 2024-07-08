@@ -12,35 +12,32 @@ public record Game(
     string[] AllowedLanguages,
     DateTime CreatedAt
 ) {
-    public Game(Entity entity) : this(entity.Id, entity.UniqueId, new(entity.Challenge!), entity.OwnerId, entity.Ended, new Mode(entity.Mode!), entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages, entity.CreatedAt) { }
+    public Game(Entity entity, int testCases) : this(entity.Id, entity.UniqueId, new(entity.Challenge!, testCases), entity.OwnerId, entity.Ended, new Mode(entity.Mode!), entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages, entity.CreatedAt) { }
 }
 
 public record GameWithUserData(
     Game Game,
     UserData UserData
 ) {
-    public GameWithUserData(UserEntity userEntity) : this(new Game(userEntity.Lobby!), new UserData(userEntity)) { }
+    public GameWithUserData(UserEntity entity, int testCases) : this(new Game(entity.Game!, testCases), new UserData(entity)) { }
 }
 
 public record GameWithUsersData(
     Game Game,
     IEnumerable<UserData> UserData
 ) {
-    public GameWithUsersData(Entity entity, IEnumerable<UserEntity> userEntities) : this(new Game(entity), userEntities.Select(e => new UserData(e))) { }
+    public GameWithUsersData(Entity entity, int testCases) : this(new Game(entity, testCases), entity.Users!.Select(e => new UserData(e))) { }
 }
 
 public record UserData(
-    int UserId,
-    string Username,
-    string Name,
-    string? Avatar,
+    User.UserListItem User,
     string? Code,
     string? Language,
     int TestsPassed,
     DateTime? SubmittedAt,
     bool ShowCode
 ) {
-    public UserData(UserEntity entity) : this(entity.User!.Id, entity.User!.Username, entity.User!.Name, entity.User!.Avatar, entity.Code, entity.Language, entity.TestsPassed, entity.SubmittedAt, entity.ShowCode) { }
+    public UserData(UserEntity entity) : this(new(entity.User!), entity.Code, entity.Language, entity.TestsPassed, entity.SubmittedAt, entity.ShowCode) { }
 }
 
 public record CreateGame(
@@ -57,7 +54,7 @@ public record CreateGame(
 
 public record UpdateSubmission(
     int UserId,
-    int LobbyId,
+    int GameId,
     string Code,
     string Language,
     int TestsPassed,

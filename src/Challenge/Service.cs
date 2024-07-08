@@ -1,7 +1,7 @@
 namespace Challenge;
 
 public class Service(Repository repository) {
-    public Challenge FindById(int id) {
+    public Challenge? FindById(int id) {
         return repository.FindById(id);
     }
 
@@ -13,15 +13,15 @@ public class Service(Repository repository) {
         return repository.Create(challenge, ownerId);
     }
 
-    public Challenge Update(int id, CreateChallenge challenge, int ownerId) {
+    public bool Update(int id, CreateChallenge challenge, int ownerId) {
         return repository.Update(id, challenge, ownerId);
     }
 
-    public Challenge Delete(int id) {
+    public bool Delete(int id) {
         return repository.Delete(id);
     }
 
-    public Challenge FindRandom() {
+    public ChallengeDetailed FindRandom() {
         return repository.FindRandom();
     }
 }

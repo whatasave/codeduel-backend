@@ -20,4 +20,15 @@ public class Entity {
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     public virtual User.Entity? Owner { get; set; }
+    public virtual IEnumerable<TestCaseEntity>? TestCases { get; set; }
+}
+
+[Table("test_case")]
+public class TestCaseEntity {
+    [Key]
+    public int Id { get; set; }
+    public required int ChallengeId { get; set; }
+    public required string Input { get; set; }
+    public required string Output { get; set; }
+    public required bool Hidden { get; set; }
 }

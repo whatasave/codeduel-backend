@@ -1,15 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Game;
 
 public class Repository(Database.DatabaseContext database) {
-    public GameWithUsersData FindByUniqueId(string uniqueId) {
-        var query = from game in database.Games
-                    join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
-                    where game.UniqueId == uniqueId
-                    select new { game, gameUser };
-        return new(query.First().game, query.Select(e => e.gameUser).AsEnumerable());
+    public GameWithUsersData? FindByUniqueId(string uniqueId) {
+        return database.Games
+            .Where(g => g.UniqueId == uniqueId)
+            .Include(g => g.Challenge)
+            .Include(g => g.Mode)
+            .Include(g => g.Users)
+            .Select(g => new GameWithUsersData(g, (from testCase in database.TestCases where testCase.ChallengeId == g.ChallengeId select testCase).Count()))
+            .FirstOrDefault();
     }
 
-    public Game CreateGame(CreateGame game) {
+    public void CreateGame(CreateGame game) {
         var entry = database.Games.Add(new Entity {
             UniqueId = game.UniqueId,
             ChallengeId = game.ChallengeId,
@@ -21,17 +25,16 @@ public class Repository(Database.DatabaseContext database) {
             AllowedLanguages = game.AllowedLanguages
         });
         database.GameUsers.AddRange(game.Users.Select(userId => new UserEntity {
-            LobbyId = entry.Entity.Id,
+            GameId = entry.Entity.Id,
             UserId = userId,
         }));
         database.SaveChanges();
-        return new Game(entry.Entity);
     }
 
     public void UpdateGameSubmission(UpdateSubmission submission) {
         var user = database.GameUsers.Single(gameUser =>
             gameUser.UserId == submission.UserId &&
-            gameUser.LobbyId == submission.LobbyId
+            gameUser.GameId == submission.GameId
         );
         user.Code = submission.Code;
         user.Language = submission.Language;
@@ -50,27 +53,29 @@ public class Repository(Database.DatabaseContext database) {
     }
 
     public bool ShareCode(int userId, ShareCodeRequest request) {
-        var user = database.GameUsers.SingleOrDefault(gameUser => gameUser.UserId == userId && gameUser.LobbyId == request.LobbyId);
-        if (user == null) throw new Exception("User not found");
+        var user = database.GameUsers.SingleOrDefault(gameUser => gameUser.UserId == userId && gameUser.GameId == request.LobbyId) ?? throw new Exception("User not found");
         user.ShowCode = request.ShowCode;
         database.SaveChanges();
         return user.ShowCode;
     }
 
     public IEnumerable<GameWithUserData> GetGamesByUserId(int userId) {
-        return (from game in database.Games
-                join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
-                where gameUser.UserId == userId
-                select new GameWithUserData(gameUser)).AsEnumerable();
+        return database.GameUsers
+            .Where(gameUser => gameUser.UserId == userId)
+            .Include(gameUser => gameUser.User)
+            .Include(gameUser => gameUser.Game)
+            .Include(gameUser => gameUser.Game!.Challenge)
+            .Include(gameUser => gameUser.Game!.Mode)
+            .Select(gameUser => new GameWithUserData(gameUser, (from testCase in database.TestCases where testCase.ChallengeId == gameUser.Game!.Challenge!.Id select testCase).Count()))
+            .ToList();
     }
 
     public IEnumerable<GameWithUsersData> GetAllGames() {
-        var query = from game in database.Games
-                    join gameUser in database.GameUsers on game.Id equals gameUser.LobbyId
-                    select new { game, gameUser };
-
-        var games = query.ToList().GroupBy(e => e.game.Id).Select(g => new GameWithUsersData(g.First().game, g.Select(e => e.gameUser)));
-        return games;
+        return database.Games
+            .Include(g => g.Challenge)
+            .Include(g => g.Mode)
+            .Include(g => g.Users)
+            .Select(g => new GameWithUsersData(g, (from testCase in database.TestCases where testCase.ChallengeId == g.ChallengeId select testCase).Count()))
+            .AsEnumerable();
     }
-
 }

@@ -1,7 +1,7 @@
 namespace Game;
 
 public class Service(Repository repository) {
-    public GameWithUsersData GetGameResults(string uniqueId) {
+    public GameWithUsersData? GetGameResults(string uniqueId) {
         return repository.FindByUniqueId(uniqueId);
     }
 
@@ -9,8 +9,8 @@ public class Service(Repository repository) {
         return repository.GetAllGames();
     }
 
-    public Game CreateGame(CreateGame request) {
-        return repository.CreateGame(request);
+    public void CreateGame(CreateGame request) {
+        repository.CreateGame(request);
     }
 
     public void UpdateSubmission(string uniqueId, UpdateSubmission request) {

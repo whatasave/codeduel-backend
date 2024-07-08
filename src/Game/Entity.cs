@@ -48,6 +48,8 @@ public class Entity {
     public virtual Challenge.Entity? Challenge { get; set; }
     public virtual User.Entity? Owner { get; set; }
     public virtual ModeEntity? Mode { get; set; }
+
+    public virtual ICollection<UserEntity>? Users { get; set; }
 }
 
 // CREATE TABLE IF NOT EXISTS lobby_user (
@@ -76,8 +78,8 @@ public class Entity {
 public class UserEntity {
     [Key]
     public int Id { get; set; }
-    [ForeignKey("Lobby")]
-    public required int LobbyId { get; set; }
+    [ForeignKey("Game")]
+    public required int GameId { get; set; }
     [ForeignKey("User")]
     public required int UserId { get; set; }
     public string? Code { get; set; }
@@ -92,7 +94,7 @@ public class UserEntity {
     public DateTime UpdatedAt { get; set; }
 
     public virtual User.Entity? User { get; set; }
-    public virtual Entity? Lobby { get; set; }
+    public virtual Entity? Game { get; set; }
 }
 
 

@@ -11,6 +11,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
     public DbSet<Game.UserEntity> GameUsers { get; set; }
     public DbSet<Game.ModeEntity> GameModes { get; set; }
     public DbSet<Challenge.Entity> Challenges { get; set; }
+    public DbSet<Challenge.TestCaseEntity> TestCases { get; set; }
     public DbSet<Permissions.Entity> Permissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {

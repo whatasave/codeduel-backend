@@ -17,8 +17,10 @@ public class Controller(Service service) {
         return service.FindAll();
     }
 
-    public Challenge FindById(int id) {
-        return service.FindById(id);
+    public Results<Ok<Challenge>, NotFound> FindById(int id) {
+        var challenge = service.FindById(id);
+        if (challenge == null) return TypedResults.NotFound();
+        return TypedResults.Ok(challenge);
     }
 
     [Auth]
@@ -30,7 +32,7 @@ public class Controller(Service service) {
     }
 
     [Auth]
-    public Results<Ok<Challenge>, ForbidHttpResult, NotFound> Update(HttpContext context, int id, CreateChallenge challenge) {
+    public Results<NoContent, ForbidHttpResult, NotFound> Update(HttpContext context, int id, CreateChallenge challenge) {
         var auth = context.Auth();
         if (!auth.Permissions.CanEditOwnChallenges) return TypedResults.Forbid();
 
@@ -38,7 +40,7 @@ public class Controller(Service service) {
         if (existingChallenge == null) return TypedResults.NotFound();
         if (existingChallenge.Owner.Id != auth.UserId) return TypedResults.Forbid();
 
-        return TypedResults.Ok(service.Update(id, challenge, auth.UserId));
+        return TypedResults.NoContent();
     }
 
     [Auth]
@@ -54,7 +56,7 @@ public class Controller(Service service) {
         return TypedResults.NoContent();
     }
 
-    public Challenge FindRandom() {
+    public ChallengeDetailed FindRandom() {
         return service.FindRandom();
     }
 }

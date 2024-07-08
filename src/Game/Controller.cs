@@ -19,13 +19,14 @@ public class Controller(Service service) {
     }
 
     [InternalAuth]
-    public Created<Game> Create(CreateGame request) {
-        var result = service.CreateGame(request);
-        return TypedResults.Created((Uri?)null, result);
+    public void Create(CreateGame request) {
+        service.CreateGame(request);
     }
 
-    public GameWithUsersData FindById(string uniqueId) {
-        return service.GetGameResults(uniqueId);
+    public Results<Ok<GameWithUsersData>, NotFound> FindById(string uniqueId) {
+        var results = service.GetGameResults(uniqueId);
+        if (results == null) return TypedResults.NotFound();
+        return TypedResults.Ok(results);
     }
 
     [InternalAuth]
@@ -47,8 +48,10 @@ public class Controller(Service service) {
         return TypedResults.NoContent();
     }
 
-    public GameWithUsersData GameResults(string uniqueId) {
-        return service.GetGameResults(uniqueId);
+    public Results<Ok<GameWithUsersData>, NotFound> GameResults(string uniqueId) {
+        var results = service.GetGameResults(uniqueId);
+        if (results == null) return TypedResults.NotFound();
+        return TypedResults.Ok(results);
     }
 
     public IEnumerable<GameWithUserData> GetUserGames(int userId) {
