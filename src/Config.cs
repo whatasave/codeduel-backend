@@ -89,8 +89,7 @@ public partial record Auth(
     string Secret,
     string ServiceHeaderName,
     string ServiceToken,
-    string LoginRedirect,
-    string[] AllowedDomains
+    string LoginRedirect
 ) {
     public static Auth FromEnv() {
         return new Auth(
@@ -103,8 +102,7 @@ public partial record Auth(
             Env.GetString("JWT_SECRET", "secretsecretsecretxxxxxxxxxxxxxx"),
             Env.GetString("SERVICE_HEADER_NAME", "x-token"),
             Env.GetString("SERVICE_TOKEN", "secretsecret"),
-            Env.GetString("LOGIN_REDIRECT", "/"),
-            ListSeparator().Split(Env.GetString("ALLOWED_DOMAINS", "codeduel.it,127.0.0.1,localhost"))
+            Env.GetString("LOGIN_REDIRECT", "/")
         );
     }
 
