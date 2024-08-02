@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using User;
 
 namespace Auth;
 
@@ -7,9 +10,10 @@ public class Controller(Config.Config config, Service service, User.Service user
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/refresh", RefreshToken);
         group.MapGet("/logout", Logout);
+        group.MapPost("/validate_token", ValidateToken);
     }
 
-    public IResult RefreshToken(HttpRequest request, HttpResponse response) {
+    public Results<NoContent, UnauthorizedHttpResult, RedirectHttpResult> RefreshToken(HttpRequest request, HttpResponse response) {
         var refreshToken = request.Cookies[config.Auth.RefreshTokenCookieName];
 
         if (refreshToken == null) {
@@ -20,14 +24,13 @@ public class Controller(Config.Config config, Service service, User.Service user
                 Secure = config.Cookie.Secure,
                 Expires = DateTimeOffset.UnixEpoch
             }.ToString());
-            return Results.Unauthorized();
+            return TypedResults.Unauthorized();
         }
 
         RefreshTokenPayload jwt;
         try {
             jwt = service.ValidateRefreshToken(refreshToken);
-        }
-        catch (Exception) {
+        } catch (Exception) {
             response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("logged_in", "false") {
                 HttpOnly = false,
                 Domain = config.Cookie.Domain,
@@ -35,11 +38,11 @@ public class Controller(Config.Config config, Service service, User.Service user
                 Secure = config.Cookie.Secure,
                 Expires = DateTimeOffset.UnixEpoch
             }.ToString());
-            return Results.Unauthorized();
+            return TypedResults.Unauthorized();
         }
 
         var user = userService.FindById(jwt.UserId);
-        if (user == null) return Results.Unauthorized();
+        if (user == null) return TypedResults.Unauthorized();
 
         var accessToken = service.GenerateAccessToken(user);
 
@@ -52,17 +55,29 @@ public class Controller(Config.Config config, Service service, User.Service user
         }.ToString());
 
         if (request.Query.TryGetValue("redirect", out StringValues redirect)) {
-            return Results.Redirect(redirect!);
+            return TypedResults.Redirect(redirect!);
         }
 
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 
-    public IResult Logout(HttpRequest request, HttpResponse response) {
+    public NoContent Logout(HttpRequest request, HttpResponse response) {
         foreach (var cookie in new string[] { config.Auth.RefreshTokenCookieName, config.Auth.AccessTokenCookieName, "logged_in", "oauth_state" }) {
             response.Cookies.Delete(cookie);
         }
 
-        return Results.NoContent();
+        return TypedResults.NoContent();
+    }
+
+    [InternalAuth]
+    public Results<Ok<LobbyUser>, UnauthorizedHttpResult> ValidateToken(VerifyTokenPayload payload) {
+        try {
+            var jwt = service.ValidateAccessToken(payload.Token);
+            var user = userService.FindById(jwt.UserId);
+            if (user == null) return TypedResults.Unauthorized();
+            return TypedResults.Ok(new LobbyUser(user));
+        } catch (Exception) {
+            return TypedResults.Unauthorized();
+        }
     }
 }

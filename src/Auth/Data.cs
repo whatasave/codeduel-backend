@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace Auth;
 
 public record RefreshTokenPayload(int UserId);
@@ -21,5 +23,20 @@ public record UserAuth(
         entity.UpdatedAt
     ) { }
 }
+
+public record VerifyTokenPayload(
+    string Token
+);
+
+public record LobbyUser(
+    int Id,
+    string Username,
+    string Name,
+    string? Avatar = null,
+    string? BackgroundImage = null
+) {
+    public LobbyUser(User.User user) : this(user.Id, user.Username, user.Name, user.Avatar, user.BackgroundImage) { }
+}
+
 
 public record CreateAuth(int UserId, string Provider, int ProviderId);
