@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Auth;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -13,30 +14,34 @@ public class Controller(Service service) {
         group.MapGet("/random", FindRandom);
     }
 
-    public IEnumerable<Challenge> FindAll() {
-        return service.FindAll();
+    public async Task<IEnumerable<Challenge>> FindAll() {
+        Console.WriteLine("--[Challenge] Find All--");
+        return await service.FindAll();
     }
 
-    public Results<Ok<Challenge>, NotFound> FindById(int id) {
-        var challenge = service.FindById(id);
+    public async Task<Results<Ok<Challenge>, NotFound>> FindById(int id) {
+        Console.WriteLine($"--[Challenge] Find By Id {id}--");
+        var challenge = await service.FindById(id);
         if (challenge == null) return TypedResults.NotFound();
         return TypedResults.Ok(challenge);
     }
 
     [Auth]
-    public Results<Ok<Challenge>, ForbidHttpResult> Create(HttpContext context, CreateChallenge challenge) {
+    public async Task<Results<Ok<Challenge>, ForbidHttpResult>> Create(HttpContext context, CreateChallenge challenge) {
+        Console.WriteLine("--[Challenge] Create--");
         var auth = context.Auth();
         if (!auth.Permissions.CanEditOwnChallenges) return TypedResults.Forbid();
 
-        return TypedResults.Ok(service.Create(challenge, auth.UserId));
+        return TypedResults.Ok(await service.Create(challenge, auth.UserId));
     }
 
     [Auth]
-    public Results<NoContent, ForbidHttpResult, NotFound> Update(HttpContext context, int id, CreateChallenge challenge) {
+    public async Task<Results<NoContent, ForbidHttpResult, NotFound>> Update(HttpContext context, int id, CreateChallenge challenge) {
+        Console.WriteLine($"--[Challenge] Update {id}--");
         var auth = context.Auth();
         if (!auth.Permissions.CanEditOwnChallenges) return TypedResults.Forbid();
 
-        var existingChallenge = service.FindById(id);
+        var existingChallenge = await service.FindById(id);
         if (existingChallenge == null) return TypedResults.NotFound();
         if (existingChallenge.Owner.Id != auth.UserId) return TypedResults.Forbid();
 
@@ -44,19 +49,21 @@ public class Controller(Service service) {
     }
 
     [Auth]
-    public Results<NoContent, ForbidHttpResult, NotFound> Delete(HttpContext context, int id) {
+    public async Task<Results<NoContent, ForbidHttpResult, NotFound>> Delete(HttpContext context, int id) {
+        Console.WriteLine($"--[Challenge] Delete {id}--");
         var auth = context.Auth();
         if (!auth.Permissions.CanEditOwnChallenges) return TypedResults.Forbid();
 
-        var existingChallenge = service.FindById(id);
+        var existingChallenge = await service.FindById(id);
         if (existingChallenge == null) return TypedResults.NotFound();
         if (existingChallenge.Owner.Id != auth.UserId) return TypedResults.Forbid();
 
-        service.Delete(id);
+        await service.Delete(id);
         return TypedResults.NoContent();
     }
 
-    public ChallengeDetailed FindRandom() {
-        return service.FindRandom();
+    public async Task<ChallengeDetailed> FindRandom() {
+        Console.WriteLine("--[Challenge] Find Random--");
+        return await service.FindRandom();
     }
 }

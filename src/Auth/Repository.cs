@@ -1,43 +1,46 @@
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+
 namespace Auth;
 
 public class Repository(Database.DatabaseContext database) {
-    public Entity? GetAuthByProviderAndId(string provider, int providerId) {
+    public async Task<Entity?> GetAuthByProviderAndId(string provider, int providerId) {
         Console.WriteLine($"[Auth Repository] Getting auth user by provider {provider} and id {providerId}");
-        return database.Authentications.FirstOrDefault(a => a.Provider == provider && a.ProviderId == providerId);
+        return await database.Authentications.FirstOrDefaultAsync(a => a.Provider == provider && a.ProviderId == providerId);
     }
 
-    public UserAuth Create(CreateAuth authUser) {
+    public async Task<UserAuth> Create(CreateAuth authUser) {
         Console.WriteLine($"[Auth Repository] Creating new auth user {authUser.Provider} {authUser.ProviderId}");
-        var entry = database.Authentications.Add(new() {
+        var entry = await database.Authentications.AddAsync(new() {
             UserId = authUser.UserId,
             Provider = authUser.Provider,
             ProviderId = authUser.ProviderId
         });
-        database.SaveChanges();
+        await database.SaveChangesAsync();
         return new UserAuth(entry.Entity);
     }
 
-    public void SaveRefreshToken(int userId, string refreshToken) {
-        var token = database.RefreshTokens.Find(userId);
+    public async Task SaveRefreshToken(int userId, string refreshToken) {
+        Console.WriteLine($"[Auth Repository] Saving refresh token for user {userId}");
+        var token = await database.RefreshTokens.FindAsync(userId);
         if (token != null) {
             token.RefreshToken = refreshToken;
-        }
-        else {
-            database.RefreshTokens.Add(new() {
+        } else {
+            await database.RefreshTokens.AddAsync(new() {
                 UserId = userId,
                 RefreshToken = refreshToken
             });
         }
-        database.SaveChanges();
+        await database.SaveChangesAsync();
     }
 
-    public bool RemoveRefreshToken(int userId) {
-        var refreshToken = database.RefreshTokens.Find(userId);
-        if (refreshToken == null) {
-            return false;
-        }
+    public async Task<bool> RemoveRefreshToken(int userId) {
+        Console.WriteLine($"[Auth Repository] Removing refresh token for user {userId}");
+        var refreshToken = await database.RefreshTokens.FindAsync(userId);
+        if (refreshToken == null) return false;
+
         database.RefreshTokens.Remove(refreshToken);
-        database.SaveChanges();
+        await database.SaveChangesAsync();
         return true;
     }
 }

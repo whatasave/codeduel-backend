@@ -1,27 +1,29 @@
+using System.Threading.Tasks;
+
 namespace Challenge;
 
 public class Service(Repository repository) {
-    public Challenge? FindById(int id) {
-        return repository.FindById(id);
+    public async Task<Challenge?> FindById(int id) {
+        return await repository.FindById(id);
     }
 
-    public IEnumerable<Challenge> FindAll() {
-        return repository.FindAll();
+    public async Task<IEnumerable<Challenge>> FindAll() {
+        return await repository.FindAll();
     }
 
-    public Challenge Create(CreateChallenge challenge, int ownerId) {
-        return repository.Create(challenge, ownerId);
+    public async Task<Challenge> Create(CreateChallenge challenge, int ownerId) {
+        return await repository.Create(challenge, ownerId);
     }
 
-    public bool Update(int id, CreateChallenge challenge, int ownerId) {
-        return repository.Update(id, challenge, ownerId);
+    public async Task<bool> Update(int id, CreateChallenge challenge, int ownerId) {
+        return await repository.Update(id, challenge, ownerId);
     }
 
-    public bool Delete(int id) {
-        return repository.Delete(id);
+    public async Task<bool> Delete(int id) {
+        return await repository.Delete(id);
     }
 
-    public ChallengeDetailed FindRandom() {
-        return repository.FindRandom();
+    public async Task<ChallengeDetailed> FindRandom() {
+        return await repository.FindRandom();
     }
 }

@@ -12,6 +12,7 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
     }
 
     public IResult Login(HttpRequest request, HttpResponse response) {
+        Console.WriteLine("--[Auth Github] Login--");
         var state = Guid.NewGuid().ToString();
 
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue("oauth_state", state) {
@@ -33,6 +34,7 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
     }
 
     public async Task<IResult> Callback([FromQuery(Name = "code")] string code, [FromQuery(Name = "state")] string state, HttpRequest request, HttpResponse response) {
+        Console.WriteLine("--[Auth Github] Callback--");
         if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(state)) {
             Console.WriteLine("[Auth Github] Missing code or state");
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5001");
@@ -56,8 +58,8 @@ public class Controller(Config.Config config, Service service, Auth.Service auth
             return Results.Redirect(config.Auth.LoginRedirect + "?error=5004");
         }
 
-        var user = service.GetUserByProviderId(userData.Id) ?? service.Create(userData);
-        var tokens = authService.GenerateTokens(user);
+        var user = await service.GetUserByProviderId(userData.Id) ?? await service.Create(userData);
+        var tokens = await authService.GenerateTokens(user);
 
         // Setting Cookies
         response.Headers.Append(HeaderNames.SetCookie, new StringValues([
