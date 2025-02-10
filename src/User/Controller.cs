@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Auth;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -7,30 +8,35 @@ public class Controller(Service service) {
     public void SetupRoutes(RouteGroupBuilder group) {
         group.MapGet("/{id}", FindById);
         group.MapGet("/", FindByUsername);
-        group.MapGet("/profile", GetProfile);
+        group.MapGet("/profile", (Delegate)GetProfile);
         group.MapGet("/list", FindAll);
     }
 
-    public Results<Ok<User>, NotFound> FindById(int id) {
-        var user = service.FindById(id);
+    public async Task<Results<Ok<User>, NotFound>> FindById(int id) {
+        Console.WriteLine($"--[User] Find By Id {id}--");
+        var user = await service.FindById(id);
         if (user == null) return TypedResults.NotFound();
         return TypedResults.Ok(user);
     }
 
-    public Results<Ok<User>, NotFound> FindByUsername([FromQuery] string username) {
-        var user = service.FindByUsername(username);
+    public async Task<Results<Ok<User>, NotFound>> FindByUsername([FromQuery] string username) {
+        Console.WriteLine($"--[User] Find By Username {username}--");
+        var user = await service.FindByUsername(username);
         if (user == null) return TypedResults.NotFound();
         return TypedResults.Ok(user);
     }
 
     [Auth]
-    public User GetProfile(HttpContext context) {
+    public async Task<Results<Ok<User>, NotFound>> GetProfile(HttpContext context) {
+        Console.WriteLine("--[User] Get Profile--");
         var auth = context.Auth();
-        var user = service.FindById(auth.UserId)!;
-        return user;
+        var user = await service.FindById(auth.UserId);
+        if (user == null) return TypedResults.NotFound();
+        return TypedResults.Ok(user);
     }
 
-    public IEnumerable<UserListItem> FindAll() {
-        return service.FindAll();
+    public async Task<IEnumerable<UserListItem>> FindAll() {
+        Console.WriteLine("--[User] Find All--");
+        return await service.FindAll();
     }
 }

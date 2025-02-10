@@ -1,29 +1,30 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Auth.Github;
 
 public class Service(Repository repository, Config.Config config, User.Service userService) {
     public const string PROVIDER = "github";
 
-    public Entity? FindById(int providerId) {
-        return repository.GetAuthByProviderAndId(PROVIDER, providerId);
+    public async Task<Entity?> FindById(int providerId) {
+        return await repository.GetAuthByProviderAndId(PROVIDER, providerId);
     }
 
-    public User.User? GetUserByProviderId(int providerId) {
-        var authUser = repository.GetAuthByProviderAndId(PROVIDER, providerId);
+    public async Task<User.User?> GetUserByProviderId(int providerId) {
+        var authUser = await repository.GetAuthByProviderAndId(PROVIDER, providerId);
         if (authUser == null) return null;
 
-        return userService.FindById(authUser.UserId);
+        return await userService.FindById(authUser.UserId);
     }
 
-    public User.User Create(GithubUserData user) {
-        var newUser = userService.Create(new(user.Login, user.Name ?? user.Login) {
+    public async Task<User.User> Create(GithubUserData user) {
+        var newUser = await userService.Create(new(user.Login, user.Name ?? user.Login) {
             Avatar = user.AvatarUrl
         });
 
-        repository.Create(new(
+        await repository.Create(new(
             newUser.Id,
             PROVIDER,
             user.Id

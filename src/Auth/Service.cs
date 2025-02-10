@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Auth;
@@ -72,13 +73,13 @@ public class Service {
         ));
     }
 
-    public string GenerateAccessToken(User.User user) {
+    public async Task<string> GenerateAccessToken(User.User user) {
         if (config.Auth.Secret.Length < 32) throw new ArgumentException("Secret key must be at least 32 characters long.");
         return jwt.WriteToken(new JwtSecurityToken(
             claims: [
                 new("sub", user.Id.ToString(), ClaimValueTypes.Integer32),
                 new("username", user.Username),
-                new("perms", permissions.FindCompactByUserId(user.Id).ToString())
+                new("perms", (await permissions.FindCompactByUserId(user.Id)).ToString())
             ],
             issuer: config.Auth.JwtIssuer,
             expires: DateTime.Now.Add(config.Auth.RefreshTokenExpires),
@@ -89,20 +90,20 @@ public class Service {
         ));
     }
 
-    public TokenPair GenerateTokens(User.User user) {
+    public async Task<TokenPair> GenerateTokens(User.User user) {
         var refreshToken = GenerateRefreshToken(user);
-        var accessToken = GenerateAccessToken(user);
+        var accessToken = await GenerateAccessToken(user);
 
-        SaveRefreshToken(user.Id, refreshToken);
+        await SaveRefreshToken(user.Id, refreshToken);
 
         return new(accessToken, refreshToken);
     }
 
-    public void SaveRefreshToken(int userId, string refreshToken) {
-        repository.SaveRefreshToken(userId, refreshToken);
+    public async Task SaveRefreshToken(int userId, string refreshToken) {
+        await repository.SaveRefreshToken(userId, refreshToken);
     }
 
-    public void RemoveRefreshToken(int userId) {
-        repository.RemoveRefreshToken(userId);
+    public async Task RemoveRefreshToken(int userId) {
+        await repository.RemoveRefreshToken(userId);
     }
 }

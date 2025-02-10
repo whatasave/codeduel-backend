@@ -1,16 +1,18 @@
+using System.Threading.Tasks;
+
 namespace Game;
 
 public class Service(Repository repository) {
-    public GameWithUsersData? GetGameResults(string uniqueId) {
-        return repository.FindByUniqueId(uniqueId);
+    public async Task<GameWithUsersData?> GetGameResults(string uniqueId) {
+        return await repository.FindByUniqueId(uniqueId);
     }
 
-    public IEnumerable<GameWithUsersData> GetAllGames() {
-        return repository.GetAllGames();
+    public async Task<IEnumerable<GameWithUsersData>> GetAllGames() {
+        return await repository.GetAllGames();
     }
 
-    public void CreateGame(CreateGame request) {
-        repository.CreateGame(request);
+    public async Task CreateGame(CreateGame request) {
+        await repository.CreateGame(request);
     }
 
     public void UpdateSubmission(string uniqueId, UpdateSubmission request) {
@@ -18,15 +20,15 @@ public class Service(Repository repository) {
         // return repository.UpdateGameSubmission(uniqueId, request);
     }
 
-    public void EndGame(string uniqueId) {
-        repository.EndGame(uniqueId);
+    public async Task EndGame(string uniqueId) {
+        await repository.EndGame(uniqueId);
     }
 
-    public void ShareGameCode(int userId, ShareCodeRequest request) {
-        repository.ShareCode(userId, request);
+    public async Task ShareGameCode(int userId, ShareCodeRequest request) {
+        await repository.ShareCode(userId, request);
     }
 
-    public IEnumerable<GameWithUserData> GetGamesByUserId(int userId) {
-        return repository.GetGamesByUserId(userId);
+    public async Task<IEnumerable<GameWithUserData>> GetGamesByUserId(int userId) {
+        return await repository.GetGamesByUserId(userId);
     }
 }

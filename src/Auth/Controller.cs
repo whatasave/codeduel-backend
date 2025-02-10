@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -13,7 +14,8 @@ public class Controller(Config.Config config, Service service, User.Service user
         group.MapPost("/validate_token", ValidateToken);
     }
 
-    public Results<NoContent, UnauthorizedHttpResult, RedirectHttpResult> RefreshToken(HttpRequest request, HttpResponse response) {
+    public async Task<Results<NoContent, UnauthorizedHttpResult, RedirectHttpResult>> RefreshToken(HttpRequest request, HttpResponse response) {
+        Console.WriteLine("--[Auth] Refresh Token--");
         var refreshToken = request.Cookies[config.Auth.RefreshTokenCookieName];
 
         if (refreshToken == null) {
@@ -41,10 +43,10 @@ public class Controller(Config.Config config, Service service, User.Service user
             return TypedResults.Unauthorized();
         }
 
-        var user = userService.FindById(jwt.UserId);
+        var user = await userService.FindById(jwt.UserId);
         if (user == null) return TypedResults.Unauthorized();
 
-        var accessToken = service.GenerateAccessToken(user);
+        var accessToken = await service.GenerateAccessToken(user);
 
         response.Headers.Append(HeaderNames.SetCookie, new SetCookieHeaderValue(config.Auth.AccessTokenCookieName, accessToken) {
             HttpOnly = config.Cookie.HttpOnly,
@@ -62,6 +64,7 @@ public class Controller(Config.Config config, Service service, User.Service user
     }
 
     public NoContent Logout(HttpRequest request, HttpResponse response) {
+        Console.WriteLine("--[Auth] Logout--");
         foreach (var cookie in new string[] { config.Auth.RefreshTokenCookieName, config.Auth.AccessTokenCookieName, "logged_in", "oauth_state" }) {
             response.Cookies.Delete(cookie);
         }
@@ -70,10 +73,11 @@ public class Controller(Config.Config config, Service service, User.Service user
     }
 
     [InternalAuth]
-    public Results<Ok<LobbyUser>, UnauthorizedHttpResult> ValidateToken(VerifyTokenPayload payload) {
+    public async Task<Results<Ok<LobbyUser>, UnauthorizedHttpResult>> ValidateToken(VerifyTokenPayload payload) {
+        Console.WriteLine("--[Auth] Validate Token--");
         try {
             var jwt = service.ValidateAccessToken(payload.Token);
-            var user = userService.FindById(jwt.UserId);
+            var user = await userService.FindById(jwt.UserId);
             if (user == null) return TypedResults.Unauthorized();
             return TypedResults.Ok(new LobbyUser(user));
         } catch (Exception) {

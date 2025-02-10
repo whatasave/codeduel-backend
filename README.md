@@ -1,3 +1,19 @@
+# Codeduel Backend
+
+
+## Install DotNet
+
+```bash
+$ winget install -e --id Microsoft.DotNet.SDK.8
+```
+
+## Setup
+
+```bash
+$ dotnet restore
+$ dotnet run .
+```
+
 ## Migrate database data
 
 ```shell
