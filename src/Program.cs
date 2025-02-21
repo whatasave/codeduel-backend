@@ -1,17 +1,18 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var config = Config.Config.FromEnv();
 var builder = WebApplication.CreateBuilder(args);
 var connString = config.Database.ConnectionString();
-var database = new Database.DatabaseContext(
+var database = () => new Database.DatabaseContext(
     new DbContextOptionsBuilder<Database.DatabaseContext>()
         .UseMySql(connString, ServerVersion.AutoDetect(connString))
         .Options
 );
 var controller = new Controller(config, database);
 
-builder.Services.AddScoped(_ => database);
+builder.Services.AddScoped(_ => database());
 builder.Services.AddTransient(_ => config);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -36,7 +37,7 @@ builder.Services.AddCors(options => {
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment()) {
+if (config.Swagger) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -65,3 +66,11 @@ controller.SetupMiddleware(app);
 app.Run();
 
 record HealthCheck(string Status);
+
+class JsonSnakeCaseNamingPolicy : JsonNamingPolicy {
+    public override string ConvertName(string name) {
+        return string.Concat(
+            name.Select((c, i) => i > 0 && char.IsUpper(c) ? "_" + c : c.ToString())
+        ).ToLower();
+    }
+}

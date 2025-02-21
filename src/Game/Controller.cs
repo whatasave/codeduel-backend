@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Auth;
 using Microsoft.AspNetCore.Http.HttpResults;
 
