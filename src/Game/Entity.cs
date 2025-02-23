@@ -39,7 +39,7 @@ public class Entity {
     public required int ModeId { get; set; }
     public required int MaxPlayers { get; set; }
     public required int GameDuration { get; set; }
-    public required string[] AllowedLanguages { get; set; }
+    public required string AllowedLanguages { get; set; }
     [DefaultValue("CURRENT_TIMESTAMP")]
     public DateTime CreatedAt { get; init; } = DateTime.Now;
     [DefaultValue("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")]

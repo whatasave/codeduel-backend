@@ -9,7 +9,7 @@ public record Game(
     Mode Mode,
     int MaxPlayers,
     int Duration,
-    string[] AllowedLanguages,
+    string AllowedLanguages,
     DateTime CreatedAt
 ) {
     public Game(Entity entity, int testCases) : this(entity.Id, entity.UniqueId, new(entity.Challenge!, testCases), entity.OwnerId, entity.Ended, new Mode(entity.Mode!), entity.MaxPlayers, entity.GameDuration, entity.AllowedLanguages, entity.CreatedAt) { }
@@ -48,7 +48,7 @@ public record CreateGame(
     int ModeId,
     int MaxPlayers,
     int GameDuration,
-    string[] AllowedLanguages,
+    string AllowedLanguages,
     List<int> Users
 );
 

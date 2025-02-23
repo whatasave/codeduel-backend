@@ -1,5 +1,6 @@
 using Auth;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Game;
 public class Controller(Service service) {
@@ -20,7 +21,7 @@ public class Controller(Service service) {
     }
 
     [InternalAuth]
-    public async Task Create(CreateGame request) {
+    public async Task Create([FromBody] CreateGame request) {
         Console.WriteLine("--[Game] Create--");
         await service.CreateGame(request);
     }

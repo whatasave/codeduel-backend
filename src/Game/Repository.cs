@@ -11,6 +11,7 @@ public class Repository(Func<Database.DatabaseContext> database) {
             .Include(g => g.Challenge)
             .Include(g => g.Mode)
             .Include(g => g.Users)
+            .Include(g => g.Owner)
             .Select(g => new GameWithUsersData(g, (from testCase in transaction.TestCases where testCase.ChallengeId == g.ChallengeId select testCase).Count()))
             .FirstOrDefaultAsync();
     }
@@ -28,6 +29,7 @@ public class Repository(Func<Database.DatabaseContext> database) {
             GameDuration = game.GameDuration,
             AllowedLanguages = game.AllowedLanguages
         });
+        await transaction.SaveChangesAsync();
         await transaction.GameUsers.AddRangeAsync(game.Users.Select(userId => new UserEntity {
             GameId = entry.Entity.Id,
             UserId = userId,
