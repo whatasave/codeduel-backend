@@ -8,7 +8,8 @@ public record Config(
     Cors Cors,
     Cookie Cookie,
     Auth Auth,
-    string FrontendUrl
+    string FrontendUrl,
+    bool Swagger
 ) {
     public static Config FromEnv() {
         DotEnv.Load();
@@ -17,7 +18,8 @@ public record Config(
             Cors.FromEnv(),
             Cookie.FromEnv(),
             Auth.FromEnv(),
-            Env.GetString("FRONTEND_URL", "http://localhost:5173")
+            Env.GetString("FRONTEND_URL", "http://localhost:5173"),
+            Env.GetBool("SWAGGER", false)
         );
     }
 }

@@ -20,7 +20,7 @@ public class Controller {
     private readonly Auth.Controller authController;
     private readonly Permissions.Controller permissionsController;
 
-    public Controller(Config.Config config, Database.DatabaseContext database) {
+    public Controller(Config.Config config, Func<Database.DatabaseContext> database) {
         authRepository = new Auth.Repository(database);
         userRepository = new User.Repository(database);
         gameRepository = new Game.Repository(database);
