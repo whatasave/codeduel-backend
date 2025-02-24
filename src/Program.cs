@@ -37,24 +37,6 @@ builder.Services.AddCors(options => {
     });
 });
 
-builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options => {
-        options.InvalidModelStateResponseFactory = context => {
-            var errors = context.ModelState
-                .Where(e => e.Value.Errors.Count > 0)
-                .Select(e => new { Field = e.Key, Errors = e.Value.Errors.Select(err => err.ErrorMessage) })
-                .ToList();
-
-            Console.WriteLine("Model Binding Errors:");
-            foreach (var error in errors) {
-                Console.WriteLine($"Field: {error.Field}, Errors: {string.Join(", ", error.Errors)}");
-            }
-
-            return new BadRequestObjectResult(errors);
-        };
-    });
-
-
 var app = builder.Build();
 
 if (config.Swagger) {
